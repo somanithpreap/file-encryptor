@@ -1,7 +1,7 @@
 #include "aes.h"
 /*
- * procedure CIPHER(msg, Nr, w)
- *   state <- msg
+ * procedure CIPHER(in, Nr, w)
+ *   state <- in
  *   state <- AddRoundKey(state,w[0...3])
  *   for round from 1 to Nr-1 do
  *     state <- SubBytes(state)
@@ -45,36 +45,24 @@ uint8 __GF_mul__(uint8 a, uint8 b) {
 }
 
 State::State() {
-  for (uint8 c = 0; c < 4; c++) {
-    for (uint8 r = 0; r < 4; r++)
-      state[r][c] = 0x00;
-  }
+  // Populate the bytes of State with 0
+  for (uint8 i = 0; i < 16; i++)
+    state[i] = 0;
 }
 
-State::State(uint8 msg[16]) {
-  if (msg[0] == 0) {
-    printf(
-        "[ERR] State::State(): Message must be a non-zero buffer sequence\n");
-    exit(-1);
+State::State(uint8 in[16]) {
+  // Check if the input data is a non-zero buffer sequence
+  if (CHECK_NON_ZERO_BUFFER(16, in)) {
+    ERROR("State::State(): Message must be a non-zero buffer sequence.");
   }
 
-  for (uint8 c = 0; c < 4; c++) {
-    for (uint8 r = 0; r < 4; r++)
-      state[r][c] = msg[r + 4 * c];
-  }
+  // Populate the bytes of State with bytes of input data
+  for (uint8 i = 0; i < 16; i++)
+    state[i] = in[i];
 }
 
-State::~State() { free(this); }
+State::~State() {}
 
-AES::AES(uint8 *msg, uint8 *key) {
-  // if (strlen(msg) > 16) {
-  //   printf("Invalid message size!\n");
-  //   abort();
-  // }
-  // if (strlen(key) == 0 || strlen(key) > 32) {
-  //   printf("Invaild key size!\n");
-  //   abort();
-  // }
-}
+AES::AES(uint8 in[16], uint8 key[32]) {}
 
-AES::~AES() { free(this); }
+AES::~AES() {}
