@@ -1,3 +1,6 @@
 #include "aes.h"
 
-int main() { ERROR("Test Error %s", "string"); }
+int main() {
+  State state((uint8 *)"Hello, World!");
+  state.print_state();
+}

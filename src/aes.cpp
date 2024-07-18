@@ -1,4 +1,5 @@
 #include "aes.h"
+
 /*
  * procedure CIPHER(in, Nr, w)
  *   state <- in
@@ -15,9 +16,6 @@
  *   return state
  * end procedure
  */
-
-// Addition in GF(2^8)
-uint8 GF_add(uint8 a, uint8 b) { return a ^ b; }
 
 // Multiplication in GF(2^8)
 uint8 GF_mul(uint8 a, uint8 b) {
@@ -44,21 +42,121 @@ uint8 __GF_mul__(uint8 a, uint8 b) {
   return p;
 }
 
-State::State() {
-  // Populate the bytes of State with 0
-  for (uint8 i = 0; i < 16; i++)
-    state[i] = 0;
+void sub_byte(uint8 *byte) {
+  CHECK_NULL_PTR(byte);
+  uint8 s_row = *byte >> 4;
+  uint8 s_col = (*byte << 4) >> 4;
+  *byte = SBOX[s_row][s_col];
 }
 
-State::State(uint8 in[16]) {
-  // Check if the input data is a non-zero buffer sequence
-  if (CHECK_NON_ZERO_BUFFER(16, in)) {
-    ERROR("State::State(): Message must be a non-zero buffer sequence.");
-  }
+void sub_word(uint8 word[4]) {
+  for (uint8 i = 0; i < 4; i++)
+    sub_byte(&word[i]);
+}
 
-  // Populate the bytes of State with bytes of input data
-  for (uint8 i = 0; i < 16; i++)
-    state[i] = in[i];
+State::State() {
+  // Populate the bytes of State with 0
+  for (uint8 r = 0; r < 4; r++) {
+    for (uint8 c = 0; c < 4; c++)
+      this->state[r][c] = 0;
+  }
+}
+
+State::State(uint8 in[16]) { this->update(in); }
+
+// Populate the bytes of State with bytes of input data
+void State::update(uint8 in[16]) {
+  CHECK_NON_ZERO_BUFFER(16, in);
+  for (uint8 r = 0; r < 4; r++) {
+    for (uint8 c = 0; c < 4; c++)
+      this->state[r][c] = in[r + 4 * c];
+  }
+}
+
+uint8 State::get_byte(uint8 row_i, uint8 col_i) {
+  if (row_i > 3 || col_i > 3)
+    ERROR("State::get_byte(): Invalid row or column index [%hhu,%hhu].", row_i,
+          col_i);
+  return this->state[row_i][col_i];
+}
+
+void State::get_word(uint8 index, uint8 holder[4]) {
+  if (index > 3)
+    ERROR("State::get_word(): Invalid word index [%hhu].", index);
+  CHECK_NULL_PTR(holder);
+  for (uint8 i = 0; i < 4; i++)
+    holder[i] = this->state[i][index];
+}
+
+void State::get_state(uint8 holder[4][4]) {
+  CHECK_NULL_PTR(holder);
+  for (uint8 r = 0; r < 4; r++) {
+    for (uint8 c = 0; c < 4; c++)
+      holder[r][c] = this->state[r][c];
+  }
+}
+
+void State::set_byte(uint8 row_i, uint8 col_i, uint8 value) {
+  if (row_i > 3 || col_i > 3)
+    ERROR("State::set_byte(): Invalid row or column index [%hhu,%hhu].", row_i,
+          col_i);
+  this->state[row_i][col_i] = value;
+}
+
+void State::serialize(uint8 holder[16]) {
+  CHECK_NULL_PTR(holder);
+  for (uint8 r = 0; r < 4; r++) {
+    for (uint8 c = 0; c < 4; c++)
+      holder[r + 4 * c] = this->state[r][c];
+  }
+}
+
+void State::print_state() {
+  for (uint8 i = 0; i < 4; i++) {
+    for (uint8 j = 0; j < 4; j++)
+      printf("%2X ", this->state[i][j]);
+    printf("\n");
+  }
+}
+
+void State::add_round_key(uint8 r_key[16]) {
+  for (uint8 r = 0; r < 4; r++) {
+    for (uint8 c = 0; c < 4; r++)
+      this->state[r][c] ^= r_key[r + 4 * c];
+  }
+}
+
+void State::sub_bytes() {
+  for (uint8 r = 0; r < 4; r++) {
+    for (uint8 c = 0; c < 4; c++)
+      sub_byte(&(this->state[r][c]));
+  }
+}
+
+void State::shift_rows() {
+  l_rotate_word(this->state[1], 1);
+
+  uint8 tmp = this->state[2][0];
+  this->state[2][0] = this->state[2][2];
+  this->state[2][2] = tmp;
+  tmp = this->state[2][1];
+  this->state[2][1] = this->state[2][3];
+  this->state[2][3] = tmp;
+
+  r_rotate_word(this->state[3], 1);
+}
+
+void State::mix_columns() {
+  for (uint8 i = 0; i < 4; i++) {
+    uint8 word[4];
+    this->get_word(i, word);
+    for (uint8 r = 0; r < 4; r++) {
+      uint8 tmp = 0;
+      for (uint8 c = 0; c < 4; c++)
+        tmp ^= GF_mul(MIXCOL_MATRIX[r][c], word[c]);
+      this->state[i][r] = tmp;
+    }
+  }
 }
 
 State::~State() {}
