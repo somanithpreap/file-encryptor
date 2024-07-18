@@ -1,4 +1,5 @@
 #include "aes.h"
+#include <cstdio>
 
 /*
  * procedure CIPHER(in, Nr, w)
@@ -44,8 +45,9 @@ uint8 __GF_mul__(uint8 a, uint8 b) {
 
 void sub_byte(uint8 *byte) {
   CHECK_NULL_PTR(byte);
+
   uint8 s_row = *byte >> 4;
-  uint8 s_col = (*byte << 4) >> 4;
+  uint8 s_col = (uint8)(*byte << 4) >> 4;
   *byte = SBOX[s_row][s_col];
 }
 
@@ -112,16 +114,20 @@ void State::serialize(uint8 holder[16]) {
 }
 
 void State::print_state() {
+  printf("+-------------+\n");
   for (uint8 i = 0; i < 4; i++) {
+    printf("| ");
     for (uint8 j = 0; j < 4; j++)
-      printf("%2X ", this->state[i][j]);
-    printf("\n");
+      printf("%.2X ", this->state[i][j]);
+    printf("|\n");
   }
+  printf("+-------------+\n");
 }
 
 void State::add_round_key(uint8 r_key[16]) {
+  CHECK_NON_ZERO_BUFFER(16, r_key);
   for (uint8 r = 0; r < 4; r++) {
-    for (uint8 c = 0; c < 4; r++)
+    for (uint8 c = 0; c < 4; c++)
       this->state[r][c] ^= r_key[r + 4 * c];
   }
 }

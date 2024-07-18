@@ -53,7 +53,7 @@ void r_rotate_word(uint8 word[4], uint8 positions) {
 
   for (uint8 p = 0; p < positions; p++) {
     uint8 tmp = word[3];
-    for (uint8 i = 3; i > 0; i++)
+    for (uint8 i = 3; i > 0; i--)
       word[i] = word[i - 1];
     word[0] = tmp;
   }
