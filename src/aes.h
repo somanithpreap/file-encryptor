@@ -3,7 +3,7 @@
 #define M 0x11B
 #define AES128_NR 10 // Number of rounds for 128-bits key
 #define AES192_NR 12 // Number of rounds for 192-bits key
-#define ARS256_NR 14 // Number of rounds for 256-bits key
+#define AES256_NR 14 // Number of rounds for 256-bits key
 
 uint8 GF_mul(uint8 a, uint8 b); // Recommended to use this instead of __GF_mul__
 uint8 __GF_mul__(uint8 a, uint8 b);
@@ -75,9 +75,13 @@ const uint8 InvSBOX[16][16] = {{0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38,
                                 0x7d}};
 const uint8 MIXCOL_MATRIX[4][4] = {
     {2, 3, 1, 1}, {1, 2, 3, 1}, {1, 1, 2, 3}, {3, 1, 1, 2}};
+const uint8 InvMIXCOL_MATRIX[4][4] = {{0xe, 0xb, 0xd, 0x9},
+                                      {0x9, 0xe, 0xb, 0xd},
+                                      {0xd, 0x9, 0xe, 0xb},
+                                      {0xb, 0xd, 0x9, 0xe}};
 
-void sub_byte(uint8 *byte);
-void sub_word(uint8 word[4]);
+void sub_byte(bool inverse, uint8 *byte);
+void sub_word(bool inverse, uint8 word[4]);
 
 class State {
 private:
@@ -92,12 +96,12 @@ public:
   void get_state(uint8 holder[4][4]);
   void set_byte(uint8 row_i, uint8 col_i, uint8 value);
   void serialize(uint8 holder[16]);
-  void print_state();
+  void print();
 
   void add_round_key(uint8 r_key[16]);
-  void sub_bytes();
-  void shift_rows();
-  void mix_columns();
+  void sub_bytes(bool inverse);
+  void shift_rows(bool inverse);
+  void mix_columns(bool inverse);
   ~State();
 };
 
@@ -109,7 +113,7 @@ private:
 public:
   AES(uint8 in[16], uint8 key[32]);
   void update(uint8 in[16]);
-  uint8 *encrypt();
-  uint8 *decrypt();
+  void encrypt(uint8 holder[16]);
+  void decrypt(uint8 holder[16]);
   ~AES();
 };
