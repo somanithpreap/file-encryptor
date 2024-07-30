@@ -203,9 +203,9 @@ void State::mix_columns(bool inverse) {
 State::~State() {}
 // key parameter and Nk are being input by the user.
 // key parameter is used for key expansion to make round key,
-template <uint32 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[k_len]) {}
+template <uint8 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[k_len]) {}
 
-template <uint32 k_len> void AES<k_len>::update(uint8 in[16]) {
+template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
   this->state.update(in);
 }
 
@@ -266,10 +266,10 @@ template <uint32 k_len> void AES<k_len>::key_expansion(uint8 key[k_len]) {
  *   return state
  * end procedure
  */
-template <uint32 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
+template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
   uint8 i = 0;
   for (; i < 4; i++)
     this->state.add_round_key(this->round_key[i]);
 }
 
-template <uint32 k_len> AES<k_len>::~AES() {}
+template <uint8 k_len> AES<k_len>::~AES() {}

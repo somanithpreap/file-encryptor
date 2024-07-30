@@ -110,7 +110,7 @@ public:
   ~State();
 };
 
-template <uint32 k_len> class AES {
+template <uint8 k_len> class AES {
 private:
   State state;
   uint8 key[k_len];
