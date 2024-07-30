@@ -266,10 +266,6 @@ template <uint8 k_len> void AES<k_len>::key_expansion(uint8 key[k_len]) {
  *   return state
  * end procedure
  */
-template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
-  uint8 i = 0;
-  for (; i < 4; i++)
-    this->state.add_round_key(this->round_key[i]);
-}
+template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {}
 
 template <uint8 k_len> AES<k_len>::~AES() {}

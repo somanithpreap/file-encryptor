@@ -124,3 +124,7 @@ public:
   void decrypt(uint8 holder[16]);
   ~AES();
 };
+
+template class AES<16>;
+template class AES<24>;
+template class AES<32>;

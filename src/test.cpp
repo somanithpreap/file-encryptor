@@ -1,4 +1,4 @@
-#include "aes.cpp"
+#include "aes.h"
 
 int main() {
   // Before testing for the output of key_expansion, you should undo all the
@@ -11,11 +11,4 @@ int main() {
                    0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4};
   AES<32> instance0(input, key);
   instance0.key_expansion(key);
-
-  for (uint8 i = 0; i < 60; i++) {
-    printf("[%.2hhu] ", i);
-    for (uint8 j = 0; j < 4; j++)
-      printf("%.2X ", instance0.round_key[i][j]);
-    printf("\n");
-  }
 }
