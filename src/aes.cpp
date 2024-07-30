@@ -142,13 +142,13 @@ void State::print() {
 }
 
 /* XOR each byte in the State by each respective byte in the given round key
-Parameter: uint8 r_key[16]: reference to the round key in a sequence format
+Parameter: uint8 r_key[4][4]: reference to the round key in a 2D array format
 */
-void State::add_round_key(uint8 r_key[16]) {
-  CHECK_NON_ZERO_BUFFER(16, r_key);
+void State::add_round_key(uint8 r_key[4][4]) {
+  // CHECK_NON_ZERO_BUFFER(16, r_key);
   for (uint8 r = 0; r < 4; r++) {
     for (uint8 c = 0; c < 4; c++)
-      this->state[r][c] ^= r_key[r + 4 * c];
+      this->state[r][c] ^= r_key[r][c];
   }
 }
 

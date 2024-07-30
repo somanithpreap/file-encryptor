@@ -103,7 +103,7 @@ public:
   void serialize(uint8 holder[16]);
   void print();
 
-  void add_round_key(uint8 r_key[16]);
+  void add_round_key(uint8 r_key[4][4]);
   void sub_bytes(bool inverse);
   void shift_rows(bool inverse);
   void mix_columns(bool inverse);
