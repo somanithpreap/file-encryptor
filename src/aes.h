@@ -114,11 +114,12 @@ template <uint8 k_len> class AES {
 private:
   State state;
   uint8 key[k_len];
+  uint8 round_key[(6 + k_len / 4) + 1][4][4];
 
 public:
-  uint8 round_key[((6 + k_len / 4) + 1) * 4][4];
+
   AES(uint8 in[16], uint8 key[k_len]);
-  void key_expansion(uint8 key[k_len]);
+  void key_expansion();
   void update(uint8 in[16]);
   void encrypt(uint8 holder[16]);
   void decrypt(uint8 holder[16]);

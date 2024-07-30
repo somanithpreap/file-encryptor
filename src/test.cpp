@@ -10,5 +10,10 @@ int main() {
                    0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7,
                    0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4};
   AES<32> instance0(input, key);
+<<<<<<< HEAD
   instance0.key_expansion(key);
+=======
+  instance0.key_expansion();
+  
+>>>>>>> fd88c36 (Changing round_key from 2D to 3D array and some modifications within key_expansion())
 }

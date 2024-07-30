@@ -212,42 +212,54 @@ template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
 /* Generate the key schedule for each state transformation round
 Parameter: uint8 key[k_len]: reference to the key inputed by the user
 */
-template <uint8 k_len> void AES<k_len>::key_expansion(uint8 key[k_len]) {
+template <uint8 k_len> void AES<k_len>::key_expansion() {
   uint8 Nk = k_len / 4;
   uint8 Nr = 6 + Nk;
 
-  uint8 i = 0;
-  while (i < Nk) {
-    for (uint8 j = 0; j < 4; j++)
-      round_key[i][j] = key[4 * i + j];
-    i++;
+  uint8 rk = 0;
+  uint8 w = 0;
+
+  while (w < Nk) {
+    for (uint8 j = 0; j < 4; j++) {
+      round_key[rk][w % 4][j] = this->key[4 * w + j];
+      printf("%.2x ", round_key[rk][w % 4][j]);
+    }
+    printf("\n");
+    w++;
+    if (!(w % 4)) rk++;
   }
   // i = 8 at the end of 1st while loop
 
   // This loop is for 1D array 'temp' taking the value of 2D array 'round_key'
   // at (i - 1) row which is simply word.
+  /*
   uint8 temp[4];
-  while (i <= 4 * Nr + 3) {
+  while (w <= 4 * Nr + 3) {
     for (uint8 j = 0; j < 4; j++)
-      temp[j] = round_key[i - 1][j];
-
+      temp[j] = round_key[w - 1][j];
+  */
     /* This condition left rotates the byte of word, substitute it with SBOX
     and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
-    if (i % Nk == 0) {
+    /*
+    if (w % Nk == 0) {
       l_rotate_word(temp, 1);
       sub_word(false, temp);
       for (uint8 j = 0; j < 4; j++) {
-        temp[j] ^= Rcon[(i - 1) / Nk][j];
+        temp[j] ^= Rcon[(w - 1) / Nk][j];
       }
-    } else if (Nk > 6 && i % Nk == 4)
+    } else if (Nk > 6 && w % Nk == 4)
       sub_word(false, temp);
-
+    */
     /* This loop does XOR operation between each elements of round_key at (i -
     Nk) and temp. It then takes append 'temp' into 'round_key' at (i)th row. */
+    /*
     for (uint8 j = 0; j < 4; j++)
-      round_key[i][j] = round_key[i - Nk][j] ^ temp[j];
-    i++;
+      round_key[w][j] = round_key[w - Nk][j] ^ temp[j];
+    w++;
+    if (!(w % 4)) rk++;
   }
+  */
+  
 }
 
 /*
@@ -266,6 +278,25 @@ template <uint8 k_len> void AES<k_len>::key_expansion(uint8 key[k_len]) {
  *   return state
  * end procedure
  */
+<<<<<<< HEAD
 template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {}
+=======
+/*
+template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
+  uint8 i = 0;
+  for (; i < 4; i++)
+    this->state.add_round_key(this->round_key[i]);
+  for (uint8 round = 1; round < (6 + k_len / 4); round++) {
+    this->state.sub_bytes(false);
+    this->state.shift_rows(false);
+    this->state.mix_columns(false);
+    this->state.add_round_key();
+  }
+  this->state.sub_bytes(false);
+  this->state.shift_rows(false);
+  this->state.add_round_key();
+}
+*/
+>>>>>>> fd88c36 (Changing round_key from 2D to 3D array and some modifications within key_expansion())
 
 template <uint8 k_len> AES<k_len>::~AES() {}
