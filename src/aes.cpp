@@ -148,7 +148,7 @@ void State::add_round_key(uint8 r_key[4][4]) {
   // CHECK_NON_ZERO_BUFFER(16, r_key);
   for (uint8 r = 0; r < 4; r++) {
     for (uint8 c = 0; c < 4; c++)
-      this->state[r][c] ^= r_key[r][c];
+      this->state[r][c] ^= r_key[c][r];
   }
 }
 
@@ -204,7 +204,9 @@ State::~State() {}
 // key parameter and Nk are being input by the user.
 // key parameter is used for key expansion to make round key,
 template <uint8 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[k_len]) {
-  for (uint8 i = 0; i < k_len; i++) this->key[i] = key[i];
+  this->update(in);
+  for (uint8 i = 0; i < k_len; i++)
+    this->key[i] = key[i];
 }
 
 template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
@@ -220,28 +222,25 @@ template <uint8 k_len> void AES<k_len>::key_expansion() {
 
   uint8 rk = 0;
   uint8 w = 0;
-
   while (w < Nk) {
-    for (uint8 j = 0; j < 4; j++) {
+    for (uint8 j = 0; j < 4; j++)
       this->round_key[rk][w % 4][j] = this->key[4 * w + j];
-      //printf("%.2x ", this->round_key[rk][w % 4][j]);
-    }
-    //printf("\n");
     w++;
-    if (!(w % 4)) rk++;
+    if (!(w % 4))
+      rk++;
   }
 
   // This loop is for 1D array 'temp' taking the value of 2D array 'round_key'
   // at (i - 1) row which is simply word.
-  
+
   uint8 temp[4];
   while (w <= 4 * Nr + 3) {
     for (uint8 j = 0; j < 4; j++)
       temp[j] = this->round_key[rk][(w % 4) - 1][j];
-  
+
     /* This condition left rotates the byte of word, substitute it with SBOX
     and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
-    
+
     if (w % Nk == 0) {
       l_rotate_word(temp, 1);
       sub_word(false, temp);
@@ -250,40 +249,22 @@ template <uint8 k_len> void AES<k_len>::key_expansion() {
       }
     } else if (Nk > 6 && w % Nk == 4)
       sub_word(false, temp);
-    
+
     /* This loop does XOR operation between each elements of round_key at (i -
     Nk) and temp. It then takes append 'temp' into 'round_key' at (i)th row. */
-    
-    for (uint8 j = 0; j < 4; j++) {
-      this->round_key[rk][w % 4][j] = this->round_key[rk][(w % 4) - Nk][j] ^ temp[j];
-      //printf("%.2x ", this->round_key[rk][w % 4][j]);
-    }
-    //printf("\n");
+    for (uint8 j = 0; j < 4; j++)
+      this->round_key[rk][w % 4][j] =
+          this->round_key[rk][(w % 4) - Nk][j] ^ temp[j];
     w++;
-    if (!(w % 4)) rk++;
+    if (!(w % 4))
+      rk++;
   }
-  
-  
 }
 
-/*
- * procedure CIPHER(in, Nr, w)
- *   state <- in
- *   state <- AddRoundKey(state,w[0...3])
- *   for round from 1 to Nr-1 do
- *     state <- SubBytes(state)
- *     state <- ShiftRows(state)
- *     state <- MixColumns(state)
- *     state <- AddRoundKey(state,w[4*round...4*round+3])
- *   end for
- *   state <- SubBytes(state)
- *   state <- ShiftRows(state)
- *   state <- AddRoundKey(state,w[4*Nr...4*Nr+3])
- *   return state
- * end procedure
- */
 template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
   const uint8 rounds = 6 + k_len / 4;
+  this->key_expansion();
+  this->state.print();
   this->state.add_round_key(this->round_key[0]);
   for (uint8 i = 1; i < rounds; i++) {
     this->state.sub_bytes(false);
@@ -298,5 +279,22 @@ template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
   this->state.print();
 }
 
+template <uint8 k_len> void AES<k_len>::decrypt(uint8 holder[16]) {
+  const uint8 rounds = 6 + k_len / 4;
+  this->key_expansion();
+  this->state.print();
+  this->state.add_round_key(this->round_key[rounds]);
+  this->state.shift_rows(true);
+  this->state.sub_bytes(true);
+  for (uint8 i = rounds - 1; i < 0; i--) {
+    this->state.add_round_key(this->round_key[i]);
+    this->state.mix_columns(true);
+    this->state.shift_rows(true);
+    this->state.sub_bytes(true);
+  }
+  this->state.add_round_key(this->round_key[0]);
+  this->state.serialize(holder);
+  this->state.print();
+}
 
 template <uint8 k_len> AES<k_len>::~AES() {}
