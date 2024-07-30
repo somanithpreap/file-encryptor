@@ -201,96 +201,51 @@ void State::mix_columns(bool inverse) {
 }
 
 State::~State() {}
-//key parameter and Nk are being input by the user.
-//key parameter is used for key expansion to make round key,
-AES::AES(uint8 in[16], uint8 key[33]) {}
-/*key changed from 32 to 33 in length as we want 
-the user to be able to input 32 characters and avoid C-string ('\0')*/
+// key parameter and Nk are being input by the user.
+// key parameter is used for key expansion to make round key,
+template <uint32 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[k_len]) {}
 
-void AES::update(uint8 in[16]) { this->state.update(in); }
+template <uint32 k_len> void AES<k_len>::update(uint8 in[16]) {
+  this->state.update(in);
+}
 
-/*This function takes 32 characters maximum from the user as key to generate 
-Nk parameter is key length, whose value is 8 in AES-256
-Nr parameter is number of rounds, whose value is 14 in AES-256*/
-void AES::key_expansion(uint8 key[32]) {
-  uint8 Nk {8};
-  uint8 Nr {AES256_NR};
+/* Generate the key schedule for each state transformation round
+Parameter: uint8 key[32]: reference to the key inputed by the user
+*/
+template <uint32 k_len> void AES<k_len>::key_expansion(uint8 key[k_len]) {
+  uint8 Nk = 8;
+  uint8 Nr = AES256_NR;
 
-  uint8 i {0};
-  printf("Output of the first 8 round keys");
+  uint8 i = 0;
   while (i < Nk) {
-    for (uint8 j = 0; j < 4; j++) {
+    for (uint8 j = 0; j < 4; j++)
       round_key[i][j] = key[4 * i + j];
-      //printf("%.2x", round_key[i][j]);
-    }
     i++;
   }
-  //i = 8 at the end of 1st while loop
+  // i = 8 at the end of 1st while loop
 
-  //This loops is for 1D array 'temp' taking the value of 2D array 'round_key' at (i - 1) row which is simply word.
-
-  //printf("Output of the next 52 round keys");
+  // This loop is for 1D array 'temp' taking the value of 2D array 'round_key'
+  // at (i - 1) row which is simply word.
   uint8 temp[4];
-
-  //printf("\n");
   while (i <= 4 * Nr + 3) {
-    //printf("\n");
-    //printf("temp %d : ", i - 1);
-    for (uint8 j = 0; j < 4; j++) {
+    for (uint8 j = 0; j < 4; j++)
       temp[j] = round_key[i - 1][j];
-      //printf("%.2x", temp[j]);
-    }
-    //printf("\n");
 
-
+    /* This condition left rotates the byte of word, substitute it with SBOX
+    and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
     if (i % Nk == 0) {
-      /*This condition left rotates the byte of word, substitute it with SBOX 
-      and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
       l_rotate_word(temp, 1);
-      //printf("after l_rotate temp %d : ", i - 1);
-      //for (uint8 j = 0; j < 4; j++) {
-      //  printf("%.2x", temp[j]);
-      //}
-      //printf("\n");
-
       sub_word(false, temp);
-      //printf("after substitute temp %d : ", i - 1);
-      //for (uint8 j = 0; j < 4; j++) {
-      //  printf("%.2x", temp[j]);
-      //}
-      //printf("\n");
-
-      for (uint32 j = 0; j < 4; j++) {
+      for (uint8 j = 0; j < 4; j++) {
         temp[j] ^= Rcon[(i - 1) / Nk][j];
       }
-      
-      //printf("after Rcon temp %d : ", i - 1);
-      //for (uint8 j = 0; j < 4; j++) {
-      //  printf("%.2x", temp[j]);
-      //}
-      //printf("\n");
-
-    } else if (Nk > 6 && i % Nk == 4) {
-      /*This condition is only for AES-256.
-      At (i % Nk == 4), 'temp' will be substituted by Sbox*/
+    } else if (Nk > 6 && i % Nk == 4)
       sub_word(false, temp);
 
-      //printf("l_rotated temp %d : ", i - 1);
-      //for (uint8 j = 0; j < 4; j++) {
-      //  printf("%.2x", temp[j]);
-      //}
-      //printf("\n");
-    }
-    
-    /*This loop does XOR operation between each elements of round_key at (i - Nk) and temp.
-    It then takes append 'temp' into 'round_key' at (i)th row.*/
-    //printf("round_key %d : ", i);
-    for (uint32 j = 0; j < 4; j++) {
+    /* This loop does XOR operation between each elements of round_key at (i -
+    Nk) and temp. It then takes append 'temp' into 'round_key' at (i)th row. */
+    for (uint8 j = 0; j < 4; j++)
       round_key[i][j] = round_key[i - Nk][j] ^ temp[j];
-      //printf("%.2x", round_key[i][j]);
-    }
-    //printf("\n");
-
     i++;
   }
 }
@@ -311,5 +266,10 @@ void AES::key_expansion(uint8 key[32]) {
  *   return state
  * end procedure
  */
+template <uint32 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
+  uint8 i = 0;
+  for (; i < 4; i++)
+    this->state.add_round_key(this->round_key[i]);
+}
 
-AES::~AES() {}
+template <uint32 k_len> AES<k_len>::~AES() {}
