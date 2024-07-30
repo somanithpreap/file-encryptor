@@ -116,7 +116,7 @@ private:
   uint8 key[k_len];
 
 public:
-  uint8 round_key[60][4];
+  uint8 round_key[((6 + k_len / 4) + 1) * 4][4];
   AES(uint8 in[16], uint8 key[k_len]);
   void key_expansion(uint8 key[k_len]);
   void update(uint8 in[16]);

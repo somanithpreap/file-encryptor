@@ -210,11 +210,11 @@ template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
 }
 
 /* Generate the key schedule for each state transformation round
-Parameter: uint8 key[32]: reference to the key inputed by the user
+Parameter: uint8 key[k_len]: reference to the key inputed by the user
 */
 template <uint8 k_len> void AES<k_len>::key_expansion(uint8 key[k_len]) {
-  uint8 Nk = 8;
-  uint8 Nr = AES256_NR;
+  uint8 Nk = k_len / 4;
+  uint8 Nr = 6 + Nk;
 
   uint8 i = 0;
   while (i < Nk) {
