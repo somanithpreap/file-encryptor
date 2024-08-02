@@ -16,15 +16,15 @@ int main() {
   AES<16> instance0(input, key);
   instance0.key_expansion();
 
-  printf("Original Buffer:\n");
+  printf("Original Buffer:  ");
   display_buffer(input);
 
   uint8 holder[16];
-  printf("Afer Encryption:\n");
+  printf("After Encryption: ");
   instance0.encrypt(holder);
   display_buffer(holder);
 
-  printf("After Decryption:\n");
+  printf("After Decryption: ");
   instance0.decrypt(holder);
   display_buffer(holder);
 }
