@@ -1,5 +1,11 @@
 #include "aes.h"
 
+void display_buffer(uint8 buf[16]) {
+  for (uint8 i = 0; i < 16; i++)
+    printf("%.2X ", buf[i]);
+  printf("\n");
+}
+
 int main() {
   // Before testing for the output of key_expansion, you should undo all the
   // comment lines that has working code first
@@ -10,9 +16,15 @@ int main() {
   AES<16> instance0(input, key);
   instance0.key_expansion();
 
+  printf("Original Buffer:\n");
+  display_buffer(input);
+
   uint8 holder[16];
-  printf("Encryption:\n");
+  printf("Afer Encryption:\n");
   instance0.encrypt(holder);
-  printf("Decryption:\n");
+  display_buffer(holder);
+
+  printf("After Decryption:\n");
   instance0.decrypt(holder);
+  display_buffer(holder);
 }

@@ -200,13 +200,11 @@ void State::mix_columns(bool inverse) {
   }
 }
 
-State::~State() {}
-
 // key parameter and Nk are being input by the user.
 // key parameter is used for key expansion to make round key,
-template <uint8 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[k_len]) {
+template <uint8 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[16]) {
   this->update(in);
-  for (uint8 i = 0; i < k_len; i++)
+  for (uint8 i = 0; i < sizeof(this->key); i++)
     this->key[i] = key[i];
 }
 
@@ -216,7 +214,7 @@ template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
 
 // Generate the key schedule for each state transformation round
 template <uint8 k_len> void AES<k_len>::key_expansion() {
-  uint8 Nk = k_len / 4;
+  uint8 Nk = sizeof(this->key) / 4;
   uint8 Nr = 6 + Nk;
 
   uint8 rk = 0;
@@ -260,7 +258,7 @@ template <uint8 k_len> void AES<k_len>::key_expansion() {
 }
 
 template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
-  const uint8 rounds = 6 + k_len / 4;
+  const uint8 rounds = 6 + sizeof(this->key) / 4;
   this->state.add_round_key(this->round_key[0]);
   for (uint8 i = 1; i < rounds; i++) {
     this->state.sub_bytes(false);
@@ -275,7 +273,7 @@ template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
 }
 
 template <uint8 k_len> void AES<k_len>::decrypt(uint8 holder[16]) {
-  const uint8 rounds = 6 + k_len / 4;
+  const uint8 rounds = 6 + sizeof(this->key) / 4;
   this->state.add_round_key(this->round_key[rounds]);
   this->state.shift_rows(true);
   this->state.sub_bytes(true);
@@ -289,4 +287,6 @@ template <uint8 k_len> void AES<k_len>::decrypt(uint8 holder[16]) {
   this->state.serialize(holder);
 }
 
-template <uint8 k_len> AES<k_len>::~AES() {}
+template class AES<16>;
+template class AES<24>;
+template class AES<32>;

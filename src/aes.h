@@ -107,7 +107,7 @@ public:
   void sub_bytes(bool inverse);
   void shift_rows(bool inverse);
   void mix_columns(bool inverse);
-  ~State();
+  ~State(){};
 };
 
 template <uint8 k_len> class AES {
@@ -122,9 +122,5 @@ public:
   void update(uint8 in[16]);
   void encrypt(uint8 holder[16]);
   void decrypt(uint8 holder[16]);
-  ~AES();
+  ~AES(){};
 };
-
-template class AES<16>;
-template class AES<24>;
-template class AES<32>;
