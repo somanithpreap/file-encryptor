@@ -1,16 +1,21 @@
 all: aes build test utils
-	rm -f bin/*.o
+	make clean
 
-build: main.o utils
+build: main utils
 	g++ bin/utils.o bin/aes.o bin/main.o -o bin/main -O2 -Wall
 
-test: aes test.o utils
-	g++ bin/utils.o bin/aes.o bin/test.o -o bin/test -O2 -Wall
+test: aes utils s-test m-test
+	g++ bin/utils.o bin/aes.o bin/s-test.o -o bin/s-test -O2 -Wall
+	g++ bin/utils.o bin/aes.o bin/m-test.o -o bin/m-test -O2 -Wall
+	make clean-o
 
-test.o:
-	g++ -c -O2 -Wall src/test.cpp -o bin/test.o
+s-test:
+	g++ -c -O2 -Wall test/single-thread.cpp -o bin/s-test.o
 
-main.o:
+m-test:
+	g++ -c -O2 -Wall test/multi-thread.cpp -o bin/m-test.o
+
+main:
 	g++ -c -O2 -Wall src/main.cpp -o bin/main.o
 
 aes:
@@ -19,8 +24,11 @@ aes:
 utils:
 	g++ -c -O2 -Wall src/utils.cpp -o bin/utils.o
 
-clean:
-	rm -f bin/*.o bin/test
+clean-o:
+	rm -f bin/*.o
 
-clean-all:
+clean-t:
+	rm -f bin/s-test bin/m-test
+
+clean:
 	rm -f bin/*

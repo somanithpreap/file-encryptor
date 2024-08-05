@@ -200,28 +200,16 @@ void State::mix_columns(bool inverse) {
   }
 }
 
-// key parameter and Nk are being input by the user.
-// key parameter is used for key expansion to make round key,
-template <uint8 k_len> AES<k_len>::AES(uint8 in[16], uint8 key[16]) {
-  this->update(in);
-  for (uint8 i = 0; i < sizeof(this->key); i++)
-    this->key[i] = key[i];
-}
-
-template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
-  this->state.update(in);
-}
-
-// Generate the key schedule for each state transformation round
-template <uint8 k_len> void AES<k_len>::key_expansion() {
-  uint8 Nk = sizeof(this->key) / 4;
+// Generate the key schedule for each State's transformation round
+void key_expansion(uint8 k_len, uint8 key[16], uint8 (*holder)[4][4]) {
+  uint8 Nk = k_len / 4;
   uint8 Nr = 6 + Nk;
 
   uint8 rk = 0;
   uint8 w = 0;
   while (w < Nk) {
     for (uint8 j = 0; j < 4; j++)
-      this->round_key[rk][w % 4][j] = this->key[4 * w + j];
+      holder[rk][w % 4][j] = key[4 * w + j];
     w++;
     if (!(w % 4))
       rk++;
@@ -232,7 +220,7 @@ template <uint8 k_len> void AES<k_len>::key_expansion() {
   uint8 temp[4];
   while (w <= 4 * Nr + 3) {
     for (uint8 j = 0; j < 4; j++)
-      temp[j] = this->round_key[rk][(w % 4) - 1][j];
+      temp[j] = holder[rk][(w % 4) - 1][j];
 
     /* This condition left rotates the byte of word, substitute it with SBOX
     and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
@@ -249,42 +237,58 @@ template <uint8 k_len> void AES<k_len>::key_expansion() {
     /* This loop does XOR operation between each elements of round_key at (i -
     Nk) and temp. It then append 'temp' into 'round_key' at (i)th row. */
     for (uint8 j = 0; j < 4; j++)
-      this->round_key[rk][w % 4][j] =
-          this->round_key[rk][(w % 4) - Nk][j] ^ temp[j];
+      holder[rk][w % 4][j] = holder[rk][(w % 4) - Nk][j] ^ temp[j];
     w++;
     if (!(w % 4))
       rk++;
   }
 }
 
-template <uint8 k_len> void AES<k_len>::encrypt(uint8 holder[16]) {
-  const uint8 rounds = 6 + sizeof(this->key) / 4;
-  this->state.add_round_key(this->round_key[0]);
-  for (uint8 i = 1; i < rounds; i++) {
-    this->state.sub_bytes(false);
-    this->state.shift_rows(false);
-    this->state.mix_columns(false);
-    this->state.add_round_key(this->round_key[i]);
-  }
-  this->state.sub_bytes(false);
-  this->state.shift_rows(false);
-  this->state.add_round_key(this->round_key[rounds]);
-  this->state.serialize(holder);
+// key parameter and Nk are being input by the user.
+template <uint8 k_len> AES<k_len>::AES(uint8 in[16]) { this->update(in); }
+
+template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
+  this->state.update(in);
 }
 
-template <uint8 k_len> void AES<k_len>::decrypt(uint8 holder[16]) {
-  const uint8 rounds = 6 + sizeof(this->key) / 4;
-  this->state.add_round_key(this->round_key[rounds]);
-  this->state.shift_rows(true);
-  this->state.sub_bytes(true);
-  for (uint8 i = rounds - 1; i > 0; i--) {
-    this->state.add_round_key(this->round_key[i]);
-    this->state.mix_columns(true);
-    this->state.shift_rows(true);
-    this->state.sub_bytes(true);
+/* Encrypt the current data in the State and outputs data to a holder
+Parameter: uint8 holder[16]: a holder variable for the encrypted data
+*/
+template <uint8 k_len>
+void AES<k_len>::encrypt(State state, uint8 holder[16],
+                         uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
+  const uint8 rounds = 6 + k_len / 4;
+  state.add_round_key(round_key[0]);
+  for (uint8 i = 1; i < rounds; i++) {
+    state.sub_bytes(false);
+    state.shift_rows(false);
+    state.mix_columns(false);
+    state.add_round_key(round_key[i]);
   }
-  this->state.add_round_key(this->round_key[0]);
-  this->state.serialize(holder);
+  state.sub_bytes(false);
+  state.shift_rows(false);
+  state.add_round_key(round_key[rounds]);
+  state.serialize(holder);
+}
+
+/* Decrypt the current data in the State and outputs data to a holder
+Parameter: uint8 holder[16]: a holder variable for the decrypted data
+*/
+template <uint8 k_len>
+void AES<k_len>::decrypt(State state, uint8 holder[16],
+                         uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
+  const uint8 rounds = 6 + k_len / 4;
+  state.add_round_key(round_key[rounds]);
+  state.shift_rows(true);
+  state.sub_bytes(true);
+  for (uint8 i = rounds - 1; i > 0; i--) {
+    state.add_round_key(round_key[i]);
+    state.mix_columns(true);
+    state.shift_rows(true);
+    state.sub_bytes(true);
+  }
+  state.add_round_key(round_key[0]);
+  state.serialize(holder);
 }
 
 template class AES<16>;

@@ -31,6 +31,12 @@ bool CHECK_NON_ZERO_BUFFER(size_t length, uint8 *buf) {
   return non_zero;
 }
 
+void display_buffer(uint8 buf[16]) {
+  for (uint8 i = 0; i < 16; i++)
+    printf("%.2X ", buf[i]);
+  printf("\n");
+}
+
 void l_rotate_word(uint8 word[4], uint8 positions) {
   if (positions == 0)
     ERROR("l_rotate_word(): Positions to be shifted needs to be non-zero.");
