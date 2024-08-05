@@ -1,6 +1,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 typedef unsigned char uint8;
 typedef unsigned int uint32;
@@ -11,3 +13,5 @@ bool CHECK_NON_ZERO_BUFFER(size_t length, uint8 *buf);
 
 void l_rotate_word(uint8 word[4], uint8 positions);
 void r_rotate_word(uint8 word[4], uint8 positions);
+
+void CLI(int argc, char *argv[]);
