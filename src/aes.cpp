@@ -201,7 +201,7 @@ void State::mix_columns(bool inverse) {
 }
 
 // Generate the key schedule for each State's transformation round
-void key_expansion(uint8 k_len, uint8 key[16], uint8 (*holder)[4][4]) {
+void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
   uint8 Nk = k_len / 4;
   uint8 Nr = 6 + Nk;
 
@@ -245,7 +245,7 @@ void key_expansion(uint8 k_len, uint8 key[16], uint8 (*holder)[4][4]) {
 }
 
 // key parameter and Nk are being input by the user.
-template <uint8 k_len> AES<k_len>::AES(uint8 in[16]) { this->update(in); }
+template <uint8 k_len> AES<k_len>::AES(uint8 in[16]) { this->state.update(in); }
 
 template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
   this->state.update(in);
