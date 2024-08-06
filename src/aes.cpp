@@ -255,9 +255,10 @@ template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
 Parameter: uint8 holder[16]: a holder variable for the encrypted data
 */
 template <uint8 k_len>
-void AES<k_len>::encrypt(State state, uint8 holder[16],
+void AES<k_len>::encrypt(State state, uint8 data[16], uint8 holder[16],
                          uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
   const uint8 rounds = 6 + k_len / 4;
+  state.update(data);
   state.add_round_key(round_key[0]);
   for (uint8 i = 1; i < rounds; i++) {
     state.sub_bytes(false);
@@ -275,9 +276,10 @@ void AES<k_len>::encrypt(State state, uint8 holder[16],
 Parameter: uint8 holder[16]: a holder variable for the decrypted data
 */
 template <uint8 k_len>
-void AES<k_len>::decrypt(State state, uint8 holder[16],
+void AES<k_len>::decrypt(State state, uint8 data[16], uint8 holder[16],
                          uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
   const uint8 rounds = 6 + k_len / 4;
+  state.update(data);
   state.add_round_key(round_key[rounds]);
   state.shift_rows(true);
   state.sub_bytes(true);

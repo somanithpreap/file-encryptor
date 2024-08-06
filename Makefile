@@ -1,8 +1,11 @@
-all: aes build test utils
-	make clean
+all:
+	make test
+	make build
+	make clean-o
 
-build: main utils
+build: main aes utils
 	g++ bin/utils.o bin/aes.o bin/main.o -o bin/main -O2 -Wall
+	make clean-o
 
 test: aes utils s-test m-test
 	g++ bin/utils.o bin/aes.o bin/s-test.o -o bin/s-test -O2 -Wall

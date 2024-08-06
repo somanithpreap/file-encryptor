@@ -1,8 +1,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 typedef unsigned char uint8;
 typedef unsigned int uint32;
@@ -15,5 +15,3 @@ void display_buffer(uint8 buf[16]);
 
 void l_rotate_word(uint8 word[4], uint8 positions);
 void r_rotate_word(uint8 word[4], uint8 positions);
-
-void CLI(int argc, char *argv[]);

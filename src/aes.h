@@ -119,9 +119,9 @@ public:
   State state;
 
   void update(uint8 in[16]);
-  static void encrypt(State state, uint8 holder[16],
+  static void encrypt(State state, uint8 data[16], uint8 holder[16],
                       uint8 round_key[(6 + k_len / 4) + 1][4][4]);
-  static void decrypt(State state, uint8 holder[16],
+  static void decrypt(State state, uint8 data[16], uint8 holder[16],
                       uint8 round_key[(6 + k_len / 4) + 1][4][4]);
   ~AES(){};
 };
