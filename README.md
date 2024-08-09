@@ -1,5 +1,26 @@
 # File Encryptor
 
+## Description
+File Encryptor is a program that converts a file into another file that is unreadable and incomprensible by using symetric encryption, so that the secret in the file is undoubtedly safe, and only user with the key is able to decrypt and access the content of the file. The program uses CLI to receive input, and you can check the command list in 
+
+## Installation
+1. Fork the repository at https://github.com/somanithpreap/file-encryptor
+2. Clone the repo
+```
+git clone <github_username>/file-encryptor
+```
+3. Make sure you have C/C++ compiler and a code editor of your preference installed on your local machine
+Checkout https://www.mingw-w64.org/downloads/ for downloading compiler and header files.
+4. Run the project using main
+For linux:
+```
+path$ bin/main
+```
+For Windows:
+```
+PS path> ./main
+```
+
 ## Project Structure
 ```
 /
@@ -32,7 +53,15 @@
 <br>
 
 ## Program Usage
-*Program usage documentation...*
+1. CLI argument
+Usage: file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <file_n/folder_n>
+Flags:
+-k, --key      Specify the key for the encryption and decryption process
+-e, --encrypt  Set the program to encrypt files
+-d, --decrypt  Set the program to decrypt files
+-r, --recurse  Process all file(s) and subfolder(s) in the specified folder(s)
+
+-h, --help     Display this help menu
 
 ## Program Structure
 The program consists of three main parts:
