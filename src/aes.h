@@ -101,7 +101,6 @@ public:
   void get_state(uint8 holder[4][4]);
   void set_byte(uint8 row_i, uint8 col_i, uint8 value);
   void serialize(uint8 holder[16]);
-  void print();
 
   void add_round_key(uint8 r_key[4][4]);
   void sub_bytes(bool inverse);
@@ -115,10 +114,8 @@ void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
 template <uint8 k_len> class AES {
 public:
   AES(){};
-  AES(uint8 in[16]);
   State state;
 
-  void update(uint8 in[16]);
   static void encrypt(State state, uint8 data[16], uint8 holder[16],
                       uint8 round_key[(6 + k_len / 4) + 1][4][4]);
   static void decrypt(State state, uint8 data[16], uint8 holder[16],

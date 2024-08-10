@@ -1,10 +1,11 @@
 all:
+    rm -f bin/*
 	make test
 	make build
 	make clean-o
 
 build: main aes utils
-	g++ bin/utils.o bin/aes.o bin/main.o -o bin/main -O2 -Wall
+	g++ bin/utils.o bin/aes.o bin/main.o -o bin/file-encryptor -O2 -Wall
 	make clean-o
 
 test: aes utils s-test m-test

@@ -129,23 +129,11 @@ void State::serialize(uint8 holder[16]) {
   }
 }
 
-// Print the State in a visual representation (remove in production)
-void State::print() {
-  printf("+-------------+\n");
-  for (uint8 i = 0; i < 4; i++) {
-    printf("| ");
-    for (uint8 j = 0; j < 4; j++)
-      printf("%.2X ", this->state[i][j]);
-    printf("|\n");
-  }
-  printf("+-------------+\n");
-}
-
 /* XOR each byte in the State by each respective byte in the given round key
 Parameter: uint8 r_key[4][4]: reference to the round key in a 2D array format
 */
 void State::add_round_key(uint8 r_key[4][4]) {
-  // CHECK_NON_ZERO_BUFFER(16, r_key);
+  CHECK_NULL_PTR(r_key);
   for (uint8 r = 0; r < 4; r++) {
     for (uint8 c = 0; c < 4; c++)
       this->state[r][c] ^= r_key[c][r];
@@ -200,8 +188,15 @@ void State::mix_columns(bool inverse) {
   }
 }
 
-// Generate the key schedule for each State's transformation round
+/* Generate the key schedule for each State's transformation round
+Parameters: uint8 k_len: length of the key (16, 24, or 32) in bytes
+            uint8 *key: original key to be expanded
+            uint8 (*holder)[4][4]: holder variable for storing round keys (there will be (6 + k_len / 4) + 1 round keys)
+*/
 void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
+  CHECK_NON_ZERO_BUFFER(k_len, key);
+  CHECK_NULL_PTR(holder);
+
   uint8 Nk = k_len / 4;
   uint8 Nr = 6 + Nk;
 
@@ -223,7 +218,7 @@ void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
       temp[j] = holder[rk][(w % 4) - 1][j];
 
     /* This condition left rotates the byte of word, substitute it with SBOX
-    and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
+    and do XOR operation on word located at (i % Nk == 0) with Rcon. */
 
     if (w % Nk == 0) {
       l_rotate_word(temp, 1);
@@ -244,19 +239,19 @@ void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
   }
 }
 
-// key parameter and Nk are being input by the user.
-template <uint8 k_len> AES<k_len>::AES(uint8 in[16]) { this->state.update(in); }
-
-template <uint8 k_len> void AES<k_len>::update(uint8 in[16]) {
-  this->state.update(in);
-}
-
 /* Encrypt the current data in the State and outputs data to a holder
-Parameter: uint8 holder[16]: a holder variable for the encrypted data
-*/
+Parameters: State state: the State instance of the current AES instance
+            uint8 data[16]: data to be encrypted
+            uint8 holder[16]: holder variable for the encrypted data
+            uint8 round_key[(6 + k_len / 4) + 1][4][4]: array of round keys */
 template <uint8 k_len>
 void AES<k_len>::encrypt(State state, uint8 data[16], uint8 holder[16],
                          uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
+  CHECK_NULL_PTR(&state);
+  CHECK_NON_ZERO_BUFFER(16, data);
+  CHECK_NULL_PTR(holder);
+  CHECK_NULL_PTR(round_key);
+
   const uint8 rounds = 6 + k_len / 4;
   state.update(data);
   state.add_round_key(round_key[0]);
@@ -273,11 +268,18 @@ void AES<k_len>::encrypt(State state, uint8 data[16], uint8 holder[16],
 }
 
 /* Decrypt the current data in the State and outputs data to a holder
-Parameter: uint8 holder[16]: a holder variable for the decrypted data
-*/
+Parameters: State state: the State instance of the current AES instance
+            uint8 data[16]: data to be decrypted
+            uint8 holder[16]: holder variable for the decrypted data
+            uint8 round_key[(6 + k_len / 4) + 1][4][4]: array of round keys */
 template <uint8 k_len>
 void AES<k_len>::decrypt(State state, uint8 data[16], uint8 holder[16],
                          uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
+  CHECK_NULL_PTR(&state);
+  CHECK_NON_ZERO_BUFFER(16, data);
+  CHECK_NULL_PTR(holder);
+  CHECK_NULL_PTR(round_key);
+
   const uint8 rounds = 6 + k_len / 4;
   state.update(data);
   state.add_round_key(round_key[rounds]);
