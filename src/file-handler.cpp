@@ -1,63 +1,82 @@
-#include "file-handler.h"  // Including the header file that contains declarations for file handling and AES operations
+#include <iostream>
 #include <vector>
-#include <thread>
 #include <fstream>
+#include <cstring> // For memcpy
+#include "file-handler.h"
 
-void process_file(const char *file_path, uint8 *key, uint8 k_len, char op_type) {
+
+// Function to convert a simple passphrase to a byte array
+std::vector<uint8> passphrase_to_bytes(const std::string &passphrase) {
+    std::vector<uint8> bytes(passphrase.begin(), passphrase.end());
+    return bytes;
+}
+
+void process_file(const char *file_path, const uint8 *key, uint8 k_len, char op_type);
+
+int main() {
+    // Input the key (passphrase)
+    std::cout << "Enter key (passphrase): ";
+    std::string passphrase;
+    std::cin.ignore(); // To ignore the newline character left in the buffer
+    std::getline(std::cin, passphrase);
+
+    // Convert passphrase to byte array
+    std::vector<uint8> key = passphrase_to_bytes(passphrase);
+    uint8 k_len = key.size();
+
+    // Input the operation type
+    char op_type;
+    std::cout << "Enter operation type (e for encrypt, d for decrypt): ";
+    std::cin >> op_type;
+
+    // Input the file path
+    std::string file_path;
+    std::cout << "Enter file path: ";
+    std::cin >> file_path;
+
+    // Process the file
+    process_file(file_path.c_str(), key.data(), k_len, op_type);
+
+    return 0;
+}
+
+void process_file(const char *file_path, const uint8 *key, uint8 k_len, char op_type) {
     // Open the input file in binary mode
     std::ifstream infile(file_path, std::ios::binary);
     if (!infile) {
-        ERROR("Unable to open file: %s", file_path);  // If the file cannot be opened, display an error message
+        std::cerr << "Unable to open file: " << file_path << std::endl;
+        return;
     }
 
-    // Determine the file size by moving the read pointer to the end of the file
+    // Determine the file size
     infile.seekg(0, std::ios::end);
-    size_t file_size = infile.tellg();  // Get the file size in bytes
-    infile.seekg(0, std::ios::beg);  // Move the read pointer back to the beginning of the file
+    size_t file_size = infile.tellg();
+    infile.seekg(0, std::ios::beg);
 
     // Create a buffer to hold the file data
     std::vector<uint8> buffer(file_size);
-    infile.read(reinterpret_cast<char*>(buffer.data()), file_size);  // Read the file content into the buffer
-    infile.close();  // Close the input file
+    infile.read(reinterpret_cast<char*>(buffer.data()), file_size);
+    infile.close();
 
-    // Perform AES operation (Encrypt/Decrypt)
-    AES<16> aes(buffer.data());  // Initialize the AES object with the buffer data
-    std::vector<uint8> output_buffer(file_size);  // Create an output buffer of the same size as the input
-
-    uint8 round_key[6 + k_len / 4][4][4];  // Allocate memory for the round keys (adjust the size as needed for AES)
-    key_expansion(k_len, key, round_key);  // Perform key expansion to generate the round keys
+    /// Perform AES operation (Encrypt/Decrypt)
+   AES<16> aes(buffer.data());
+   std::vector<uint8> output_buffer(file_size);
+   
+   uint8 round_key[6 + k_len / 4][4][4];
+   key_expansion(k_len,key, round_key);
 
     if (op_type == 'e') {
-        aes.encrypt(buffer.data(), buffer.data(), output_buffer.data(), round_key);  // Encrypt the file data
+        aes.encrypt(buffer.data(), buffer.data(), output_buffer.data(), round_key);
     } else if (op_type == 'd') {
-        aes.decrypt(buffer.data(), buffer.data(), output_buffer.data(), round_key);  // Decrypt the file data
+        aes.decrypt(buffer.data(), buffer.data(), output_buffer.data(), round_key);
     } else {
-        ERROR("Invalid operation type.");  // If the operation type is invalid, display an error message
+        std::cerr << "Invalid operation type." << std::endl;
+        return;
     }
 
-    // Write the output to a new file (either .enc for encryption or .dec for decryption)
-    std::ofstream outfile((std::string(file_path) + ((op_type == 'e') ? ".enc" : ".dec")).c_str(), std::ios::binary);
-    outfile.write(reinterpret_cast<char*>(output_buffer.data()), output_buffer.size());  // Write the output data to the file
-    outfile.close();  // Close the output file
-}
-
-void process_files(std::vector<char *> &files, uint8 *key, uint8 k_len, char op_type) {
-    size_t num_files = files.size();  // Get the number of files to process
-    std::vector<std::thread> threads;  // Create a vector to hold the threads
-
-    // Process files in batches of 4
-    for (size_t i = 0; i < num_files; i += 4) {
-        for (size_t j = 0; j < 4 && (i + j) < num_files; ++j) {
-            // Create a thread for each file, up to 4 files at a time
-            threads.push_back(std::thread(process_file, files[i + j], key, k_len, op_type));
-        }
-
-        // Wait for all threads in the current batch to finish
-        for (std::thread &t : threads) {
-            if (t.joinable()) {
-                t.join();  // Join the thread (wait for it to finish)
-            }
-        }
-        threads.clear();  // Clear the thread vector for the next batch of files
-    }
+    // Write the output to a new file
+    std::string output_file_path = std::string(file_path) + ((op_type == 'e') ? ".enc" : ".dec");
+    std::ofstream outfile(output_file_path.c_str(), std::ios::binary);
+    outfile.write(reinterpret_cast<char*>(output_buffer.data()), output_buffer.size());
+    outfile.close();
 }

@@ -1,4 +1,3 @@
-#include "aes.h"
 #include "file-handler.h"
 #include <cstring>
 #include <vector>
@@ -89,13 +88,6 @@ int main(int argc, char *argv[]) {
   printf("\n");
 
   // File Handling here...
-
-  uint8 key[] = { };
-    uint8 k_len = 16; // Key length 
-
-    std::vector<char *> files = { }; //file path
-    char op_type = 'e'; // 'e' for encrypt, 'd' for decrypt
-
     if (files.size() == 1) {
         process_file(files[0], key, k_len, op_type);
     } else {
