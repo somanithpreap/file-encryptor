@@ -104,7 +104,7 @@ file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <file
   This class is responsible for the implementation of AES algorithm, both encryption and decryption. It uses the data from the State and round keys from **round_key**, and applies methods on the data and key. After all the processing, it is stored in "holder" which is a holder variable for the encrypted (when "encrypt" function is used) or the decrypted (when "decrypt" function is used) data. For more information, check **aes.cpp**.
 
 5. **src/main.cpp** <br>
-  This program uses CLI (Command Line Interface) for interaction between user and the machine. We admit that it is not user friendly, but *It Has To Be This Way* due to time contraint. For command line and usage, checkout **1. CLI Argument**
+  This program uses CLI (Command Line Interface) for interaction between user and the machine. We admit that it is not user friendly, but *It Has To Be This Way* due to time contraint. For command line and usage, checkout **Program Usage**
 
 6. Constant Variables in **src/aes.h** <br>
   They are constant values written to use in methods that they are belonged to. Listen, **THEY MUST NOT BE TAMPERED BY ANYONE!** in order to make the program running as it should.
@@ -157,20 +157,20 @@ The program consists of three main parts:
   5. Open a Pull Request
 
 ## License
-  Distributed under the MIT License. See `LICENSE.txt` for more information.
+  Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
-  somanithpreap - somanithpreap@gmail.com
-  SoksophalSORN - ss6024010027@camtech.edu.kh
+  somanithpreap - somanithpreap@gmail.com <br>
+  SoksophalSORN - ss6024010027@camtech.edu.kh <br>
   menghorngkao -  mk6024010034@camtech.edu.kh
 
   Project Link: https://github.com/somanithpreap/file-encryptor
 
 ## Acknowledgements
-  - Contributors<br>
-  -> Project Manager: https://github.com/somanithpreap <br>
-  -> Contributor : https://github.com/menghorngkao <br>
-  -> Contributor : https://github.com/SoksophalSORN
+  - **Contributors** <br>
+  => Project Manager: https://github.com/somanithpreap <br>
+  => Contributor : https://github.com/menghorngkao <br>
+  => Contributor : https://github.com/SoksophalSORN
 
-  - C/C++ Programming Language <br>
+  - **C/C++ Programming Language** <br>
     This project utilizes C/C++ for its core functionality. Special thanks to the C and C++ communities for their robust programming languages and support.
