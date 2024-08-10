@@ -110,8 +110,6 @@ public:
   ~State(){};
 };
 
-void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
-
 template <uint8 k_len> class AES {
 public:
   AES(){};

@@ -201,7 +201,8 @@ void State::mix_columns(bool inverse) {
 }
 
 // Generate the key schedule for each State's transformation round
-void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
+
+void key_expansion(uint8 k_len, const uint8 *key, uint8 (*holder)[4][4]){
   uint8 Nk = k_len / 4;
   uint8 Nr = 6 + Nk;
 
@@ -275,6 +276,7 @@ void AES<k_len>::encrypt(State state, uint8 data[16], uint8 holder[16],
 /* Decrypt the current data in the State and outputs data to a holder
 Parameter: uint8 holder[16]: a holder variable for the decrypted data
 */
+
 template <uint8 k_len>
 void AES<k_len>::decrypt(State state, uint8 data[16], uint8 holder[16],
                          uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
@@ -296,3 +298,4 @@ void AES<k_len>::decrypt(State state, uint8 data[16], uint8 holder[16],
 template class AES<16>;
 template class AES<24>;
 template class AES<32>;
+

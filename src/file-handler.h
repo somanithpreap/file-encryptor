@@ -15,4 +15,6 @@ void process_file(const char *file_path, uint8 *key, uint8 k_len, char op_type);
 // Function to process multiple files, leveraging multithreading
 void process_files(std::vector<char *> &files, uint8 *key, uint8 k_len, char op_type);
 
+
+
 #endif  // End of header guard
