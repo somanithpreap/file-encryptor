@@ -1,7 +1,7 @@
 # File Encryptor
 
 ## Description
-File Encryptor is a program that converts a file into an unreadable and incomprensible file by using symmetric encryption, so that the secret in the file is undoubtedly cryptic, and only user with the key is able to decrypt and access the content of the file. This is a CLI program, and you can check the command listed in **Program Usage**.
+File Encryptor is a program that converts a file into an unreadable and incomprehensible file by using symmetric encryption, so that the secret in the file is undoubtedly cryptic and only the user with the key is able to decrypt and access the content of the file. This program operates on the Command Line Interface (CLI), and you can review the commands provided under [Program Usage](#program-usage).
 
 ## Table of Contents
   1. [Installation](#installation)
@@ -16,7 +16,7 @@ File Encryptor is a program that converts a file into an unreadable and incompre
 ```
 git clone https://github.com/<github_username>/file-encryptor
 ```
-3. Make sure you have C/C++ compiler and a code editor of your preference installed on your local machine. Checkout https://www.mingw-w64.org/downloads/ for downloading compiler and header files. Compile the project using the following commands: <br>
+3. Make sure you have a C/C++ compiler and a code editor of your preference installed on your local machine. Check out https://www.mingw-w64.org/downloads/ for downloading compiler and header files. Compile the project using the following commands: <br>
   `make` - compiles both the main program and the test programs <br>
   `make build` - compiles the main program <br>
   `make test` - compiles the test programs <br>
@@ -86,13 +86,13 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
     ~State(){};
   };
 ```
-  This class is responsible for taking the bytes imported by file-handler and arrange them into 4 * 4 array of bytes called "State". Creating "State" is evolved by various methods which have shown in the code snippet. For more information, check **aes.cpp** to see the usage of each function.
+  This class is responsible for taking the bytes imported by file-handler and arranging them into a 4 * 4 array of bytes called "State." Creating "state" is evolved by various methods, as shown in the code snippet. For more information, check **aes.cpp** to see the usage of each function.
 
 4. **Key Expansion Algorithm** <br>
 ```cpp
   void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
 ```
-  This function takes the format length of key which could be either 16, 24, or 32 bytes, the actual key for encryption/decription, and a holder array to store the round keys. It's resulting in more unique keys (the amount of key is based on the length of the key respectively, could be either 11 round keys, 13 round keys, or 15 round keys). The holder variable should have the size of **(6 + k_len / 4) + 1**. For more information, check the comments in **aes.cpp**.
+  This function takes the format length of the key, which could be either 16, 24, or 32 bytes, the actual key for encryption or decryption, and a holder array to store the round keys. It's resulting in more unique keys (the number of keys is based on the length of the key, which could be either 11 round keys, 13 round keys, or 15 round keys). The holder variable should have a size of **(6 + k_len / 4) + 1**. For more information, check the comments in **aes.cpp**.
 
 5. **AES Algorithm** <br>
 ```cpp
@@ -108,25 +108,25 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
     ~AES(){};
   };
 ```
-  This class is responsible for the implementation of AES algorithm, both encryption and decryption. It uses the data from the State and round keys from **round_key**, and applies methods on the data and key. After all the processing, it is stored in "holder" which is a holder variable for the encrypted (when "encrypt" function is used) or the decrypted (when "decrypt" function is used) data. For more information, check **aes.cpp**.
+  This class is responsible for the implementation of the AES algorithm, both for encryption and decryption. It uses the data from the state and round keys from **round_key** and applies methods to the data and key. After all the processing, it is stored in "holder," which is a holder variable for the encrypted (when the "encrypt" function is used) or the decrypted (when the "decrypt" function is used) data. For more information, check **aes.cpp**.
 
 6. **src/main.cpp** <br>
-  This program uses CLI (Command Line Interface) for interaction between user and the machine. We admit that it is not user friendly, but *It Has To Be This Way* due to time contraint. For command line and usage, checkout [Program Usage](#program-usage).
+  This program uses CLI (Command Line Interface) for interaction between the user and the machine. We admit that it is not user-friendly, but *It Has To Be This Way* due to time constraints. For command line and usage, checkout [Program Usage](#program-usage).
 
 7. Constant Variables in **src/aes.h** <br>
-  They are constant values written to use in methods that they are belonged to. Listen, **THEY MUST NOT BE TAMPERED BY ANYONE!** in order to make the program running as it should.
-  - **SBOX** and **InvSBOX** (Substitution Box and Inverse Substitution Box) are used in the **sub_byte()** function.
-  - **MIXCOL_MATRIX** and **InvMIXCOL_MATRIX** are used in **mix_columns()** function.
-  - **Rcon** (Round Constant) is used **key_expansion()** function.
-
-8. **src/utils.cpp** <br>
-  The functions in here are utilities for developer to manipulate bytes and checking for error, etc.
-  - **ERROR()** function is for displaying error message and end the program if the program is not running as expected.
-  - **CHECK_NULL_PTR()** function is for checking if a pointer given is a NULL pointer. If it does, it displays an error message.
-  - **CHECK_NON_ZERO_BUFFER()** function is for checking if given buffer has data or not. If it does not, it displays an error message.
-  - **display_buffer()** function is for displaying a 16 bytes long buffer.
-  - **l_rotate_word()** function is for shifting bytes to the left based on the input. It takes a 4 bytes array and number of how far you want to shift a byte.
-  - **r_rotate_word()** function is for shifting bytes to the right based on the input. It takes a 4 bytes array and number of how far you want to shift a byte.
+  They are constant values written to be used in the methods to which they belong. Listen, **THEY MUST NOT BE TAMPERED BY ANYONE!** in order to make the program run as it should.
+  - **SBOX** and **InvSBOX** (Substitution Box and Inverse Substitution Box) are used in the **sub_byte()** function.
+  - **MIXCOL_MATRIX** and **InvMIXCOL_MATRIX** are used in the **mix_columns()** function.
+  - **Rcon** (Round Constant) is used in the **key_expansion()** function.
+   
+9. **src/utils.cpp** <br>
+  The functions here are utilities for developers to manipulate bytes, check for errors, etc.
+  - **ERROR()** function is for displaying an error message and ending the program if it is not running as expected.
+  - **CHECK_NULL_PTR()** function is for checking if a pointer given is a NULL pointer. If it does, it displays an error message.
+  - **CHECK_NON_ZERO_BUFFER()** function is for checking if a given buffer has data or not. If it does not, it displays an error message.
+  - **display_buffer()** function is for displaying a 16-byte buffer.
+  - **l_rotate_word()** function is for shifting bytes to the left based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte.
+  - **r_rotate_word()** function is for shifting bytes to the right based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte.
 
 ## Program Structure Diagram
 The program consists of three main parts:
