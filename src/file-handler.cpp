@@ -13,13 +13,17 @@
 using namespace std;
 
 // Function to read a file into a buffer
-void readFile(ifstream& infile, vector<uint8>& buffer) {
+void readFile(ifstream& infile, vector<char>& buffer) {
     infile.seekg(0, ios::end);
     streamsize fileSize = infile.tellg();
     infile.seekg(0, ios::beg);
 
-    buffer.resize(static_cast<size_t>(fileSize));
-    infile.read(reinterpret_cast<char*>(buffer.data()), fileSize);
+    while (fileSize > 0) {
+        streamsize readSize = min(static_cast<streamsize>(1024), fileSize);
+        buffer.resize(static_cast<size_t>(readSize));
+        infile.read(buffer.data(), readSize);
+        fileSize -= infile.gcount();
+    }
     infile.close();
 }
 
