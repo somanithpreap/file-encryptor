@@ -18,14 +18,14 @@ git clone https://github.com/<github_username>/file-encryptor
 
 ## Program Usage
 ```
-file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <file_n/folder_n>
+bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <file_n/folder_n>
 ```
--k, --key      Specify the key for the encryption and decryption process <br>
--e, --encrypt  Set the program to encrypt files <br>
--d, --decrypt  Set the program to decrypt files <br>
--r, --recurse  Process all file(s) and subfolder(s) in the specified folder(s) <br>
+-k, --key &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Specify the key for the encryption and decryption process <br>
+-e, --encrypt &nbsp;Set the program to encrypt files <br>
+-d, --decrypt &nbsp;Set the program to decrypt files <br>
+-r, --recurse &nbsp;Process all file(s) and subfolder(s) in the specified folder(s) <br>
 <br>
--h, --help     Display this help menu <br>
+-h, --help &nbsp;&nbsp;&nbsp;&nbsp;Display this help menu <br>
 
 ## Project Structure
 1. **File structure**
@@ -103,16 +103,16 @@ file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <file
 ```
   This class is responsible for the implementation of AES algorithm, both encryption and decryption. It uses the data from the State and round keys from **round_key**, and applies methods on the data and key. After all the processing, it is stored in "holder" which is a holder variable for the encrypted (when "encrypt" function is used) or the decrypted (when "decrypt" function is used) data. For more information, check **aes.cpp**.
 
-5. **src/main.cpp** <br>
+6. **src/main.cpp** <br>
   This program uses CLI (Command Line Interface) for interaction between user and the machine. We admit that it is not user friendly, but *It Has To Be This Way* due to time contraint. For command line and usage, checkout **Program Usage**
 
-6. Constant Variables in **src/aes.h** <br>
+7. Constant Variables in **src/aes.h** <br>
   They are constant values written to use in methods that they are belonged to. Listen, **THEY MUST NOT BE TAMPERED BY ANYONE!** in order to make the program running as it should.
   - **SBOX** and **InvSBOX** (Substitution Box and Inverse Substitution Box) are used in the **sub_byte()** function.
   - **MIXCOL_MATRIX** and **InvMIXCOL_MATRIX** are used in **mix_columns()** function.
   - **Rcon** (Round Constant) is used **key_expansion()** function.
 
-7. **src/utils.cpp** <br>
+8. **src/utils.cpp** <br>
   The functions in here are utilities for developer to manipulate bytes and checking for error, etc.
   - **ERROR()** function is for displaying error message and end the program if the program is not running as expected.
   - **CHECK_NULL_PTR()** function is for checking if a pointer given is a NULL pointer. If it does, it displays an error message.

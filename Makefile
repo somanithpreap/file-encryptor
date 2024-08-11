@@ -1,5 +1,4 @@
-all:
-    rm -f bin/*
+all: clean
 	make test
 	make build
 	make clean-o
