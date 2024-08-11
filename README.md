@@ -128,7 +128,7 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
   - **l_rotate_word()** function is for shifting bytes to the left based on the input. It takes a 4 bytes array and number of how far you want to shift a byte.
   - **r_rotate_word()** function is for shifting bytes to the right based on the input. It takes a 4 bytes array and number of how far you want to shift a byte.
 
-## Program Structure
+## Program Structure Diagram
 The program consists of three main parts:
 ```
 +--------------------------------------+
