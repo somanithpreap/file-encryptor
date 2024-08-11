@@ -28,7 +28,7 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
 -h, --help &nbsp;&nbsp;&nbsp;&nbsp;Display this help menu <br>
 
 ## Project Structure
-1. **File structure**
+1. **File structure** <br>
 ```
 /
 |
@@ -56,7 +56,7 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
 ```
 2. **File Handler** <br>
   (To Be Updated)
-3. **The State**
+3. **The State** <br>
 ```cpp
   class State {
   private:
@@ -81,13 +81,13 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
 ```
   This class is responsible for taking the bytes imported by file-handler and arrange them into 4 * 4 array of bytes called "State". Creating "State" is evolved by various methods which have shown in the code snippet. For more information, check **aes.cpp** to see the usage of each function.
 
-4. **Key Expansion Algorithm**
+4. **Key Expansion Algorithm** <br>
 ```cpp
   void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
 ```
   This function takes the format length of key which could be either 16, 24, or 32 bytes, the actual key for encryption/decription, and a holder array to store the round keys. It's resulting in more unique keys (the amount of key is based on the length of the key respectively, could be either 11 round keys, 13 round keys, or 15 round keys). The holder variable should have the size of **(6 + k_len / 4) + 1**. For more information, check the comments in **aes.cpp**.
 
-5. **AES Algorithm**
+5. **AES Algorithm** <br>
 ```cpp
   template <uint8 k_len> class AES {
   public:
@@ -174,3 +174,6 @@ The program consists of three main parts:
 
   - **C/C++ Programming Language** <br>
     This project utilizes C/C++ for its core functionality. Special thanks to the C and C++ communities for their robust programming languages and support.
+
+  - **National Institute of Standards and Technologies**
+    National Institute of Standards and Technology (2001) Advanced Encryption Standard (AES). (Department of Commerce, Washington, D.C.), Federal Information Processing Standards Publication (FIPS) NIST FIPS 197-upd1, updated May 9, 2023. https://doi.org/10.6028/NIST.FIPS.197-upd
