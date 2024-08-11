@@ -3,6 +3,13 @@
 ## Description
 File Encryptor is a program that converts a file into an unreadable and incomprensible file by using symmetric encryption, so that the secret in the file is undoubtedly cryptic, and only user with the key is able to decrypt and access the content of the file. This is a CLI program, and you can check the command listed in **Program Usage**.
 
+##Table of Contents
+  1. [Installation](#installation)
+  2. [Usage](#usage)
+  3. [Contributing](#contributing)
+  4. [License](#license)
+  5. [Acknowledgements](#acknowledgements)
+
 ## Installation
 1. Fork the repository at https://github.com/somanithpreap/file-encryptor
 2. Clone the repo
