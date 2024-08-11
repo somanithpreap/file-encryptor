@@ -115,18 +115,18 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
 
 7. Constant Variables in **src/aes.h** <br>
   They are constant values written to be used in the methods to which they belong. Listen, **THEY MUST NOT BE TAMPERED BY ANYONE!** in order to make the program run as it should.
-  - **SBOX** and **InvSBOX** (Substitution Box and Inverse Substitution Box) are used in the **sub_byte()** function.
-  - **MIXCOL_MATRIX** and **InvMIXCOL_MATRIX** are used in the **mix_columns()** function.
-  - **Rcon** (Round Constant) is used in the **key_expansion()** function.
+  - **SBOX** and **InvSBOX** (Substitution Box and Inverse Substitution Box) are used in the **sub_byte()** function. <br>
+  - **MIXCOL_MATRIX** and **InvMIXCOL_MATRIX** are used in the **mix_columns()** function. <br>
+  - **Rcon** (Round Constant) is used in the **key_expansion()** function. <br>
    
 9. **src/utils.cpp** <br>
-  The functions here are utilities for developers to manipulate bytes, check for errors, etc.
-  - **ERROR()** function is for displaying an error message and ending the program if it is not running as expected.
-  - **CHECK_NULL_PTR()** function is for checking if a pointer given is a NULL pointer. If it does, it displays an error message.
-  - **CHECK_NON_ZERO_BUFFER()** function is for checking if a given buffer has data or not. If it does not, it displays an error message.
-  - **display_buffer()** function is for displaying a 16-byte buffer.
-  - **l_rotate_word()** function is for shifting bytes to the left based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte.
-  - **r_rotate_word()** function is for shifting bytes to the right based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte.
+  The functions here are utilities for developers to manipulate bytes, check for errors, etc. <br>
+  - **ERROR()** function is for displaying an error message and ending the program if it is not running as expected. <br>
+  - **CHECK_NULL_PTR()** function is for checking if a pointer given is a NULL pointer. If it does, it displays an error message. <br>
+  - **CHECK_NON_ZERO_BUFFER()** function is for checking if a given buffer has data or not. If it does not, it displays an error message. <br>
+  - **display_buffer()** function is for displaying a 16-byte buffer. <br>
+  - **l_rotate_word()** function is for shifting bytes to the left based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte. <br>
+  - **r_rotate_word()** function is for shifting bytes to the right based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte. <br>
 
 ## Program Structure Diagram
 The program consists of three main parts:
