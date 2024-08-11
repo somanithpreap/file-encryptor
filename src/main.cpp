@@ -1,7 +1,14 @@
 #include "aes.h"
 #include <cstring>
 #include <vector>
+#include <filesystem>
+
+namespace fs = filesystem;
+error_code ec; 
 using namespace std;
+
+void scan_directory(const fs::path &dir_path, vector<string> &files, bool recurse);
+void process_file(const string &file_path, char op_type, const uint8 *key, uint8 k_len);
 
 void print_help();
 
@@ -87,6 +94,23 @@ int main(int argc, char *argv[]) {
   printf("\n");
 
   // File Handling here...
+  vector<string> all_files; // Vector to store all files to be processed
+  for (const auto &file : files) {
+    fs::path path(file);
+    if (fs::is_regular_file(path)) {
+       // If it's a file, add directly to the list of files to process
+      all_files.push_back(path.string());
+      } else if (fs::is_directory(path)) {
+        // If it's a directory, scan the directory and add files to the list
+        scan_directory(path, all_files, recurse);
+      } 
+    }
+
+    for (const auto &file : all_files) {
+        process_file(file,op_type, key, k_len);
+    }
+
+    return 0;
 }
 
 void print_help() {
