@@ -111,7 +111,7 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
   This class is responsible for the implementation of the AES algorithm, both for encryption and decryption. It uses the data from the state and round keys from **round_key** and applies methods to the data and key. After all the processing, it is stored in "holder," which is a holder variable for the encrypted (when the "encrypt" function is used) or the decrypted (when the "decrypt" function is used) data. For more information, check **aes.cpp**.
 
 6. **src/main.cpp** <br>
-  This program uses CLI (Command Line Interface) for interaction between the user and the machine. We admit that it is not user-friendly, but *It Has To Be This Way* due to time constraints. For command line and usage, checkout [Program Usage](#program-usage).
+  This program uses CLI (Command Line Interface) for interaction between the user and the machine. We admit that it is not user-friendly, but [*It Has To Be This Way*](https://youtu.be/ZYAPgPH9hsI?si=toqTePCt2pGMgEbP) due to time constraints. For command line and usage, checkout [Program Usage](#program-usage).
 
 7. Constant Variables in **src/aes.h** <br>
   They are constant values written to be used in the methods to which they belong. Listen, **THEY MUST NOT BE TAMPERED BY ANYONE!** in order to make the program run as it should.
