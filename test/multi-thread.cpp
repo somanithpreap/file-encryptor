@@ -50,7 +50,7 @@ int main() {
   uint8 round_keys[AES128_NR + 1][4][4];
   key_expansion(16, key, round_keys);
 
-  printf("Original Buffer:  ");
+  printf("Original Buffer:\n");
   for (uint8 i = 0; i < 16; i++)
     display_buffer(inputs[i]);
 
@@ -58,15 +58,14 @@ int main() {
   thread *threads[NUM_THREADS];
   uint8 holders[16][16];
 
-  printf("After Encryption:\n");
   for (uint8 i = 0; i < 8; i++) {
     for (uint8 j = 0; j < NUM_THREADS; j++)
       threads[j] =
           new thread(&AES<16>::encrypt, instances[j].state, inputs[2 * i + j],
                      holders[2 * i + j], round_keys);
-    for (uint8 j = 0; j < NUM_THREADS; j++) {
-      threads[j]->join();
-      display_buffer(holders[j]);
-    }
+    for (uint8 j = 0; j < NUM_THREADS; j++) threads[j]->join();
   }
+
+  printf("After Encryption:\n");
+  for (uint8 i = 0; i < 16; i++) display_buffer(holders[i]);
 }
