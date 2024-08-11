@@ -3,7 +3,7 @@
 ## Description
 File Encryptor is a program that converts a file into an unreadable and incomprensible file by using symmetric encryption, so that the secret in the file is undoubtedly cryptic, and only user with the key is able to decrypt and access the content of the file. This is a CLI program, and you can check the command listed in **Program Usage**.
 
-##Table of Contents
+## Table of Contents
   1. [Installation](#installation)
   2. [Program Usage](#program-usage)
   3. [Contributing](#contributing)
