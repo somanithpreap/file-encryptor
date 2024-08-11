@@ -175,5 +175,5 @@ The program consists of three main parts:
   - **C/C++ Programming Language** <br>
     This project utilizes C/C++ for its core functionality. Special thanks to the C and C++ communities for their robust programming languages and support.
 
-  - **National Institute of Standards and Technologies**
+  - **National Institute of Standards and Technologies** <br>
     National Institute of Standards and Technology (2001) Advanced Encryption Standard (AES). (Department of Commerce, Washington, D.C.), Federal Information Processing Standards Publication (FIPS) NIST FIPS 197-upd1, updated May 9, 2023. https://doi.org/10.6028/NIST.FIPS.197-upd
