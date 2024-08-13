@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 typedef unsigned char uint8;
+typedef unsigned short uint16;
 typedef unsigned int uint32;
 
 void ERROR(const char *message, ...);

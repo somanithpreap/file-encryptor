@@ -111,14 +111,15 @@ public:
 
 void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
 
-template <uint8 k_len> class AES {
-public:
-  AES(){};
+class AES {
+private:
+  uint8 rounds;
   State state;
-
-  static void encrypt(State state, uint8 data[16], uint8 holder[16],
-                      uint8 round_key[(6 + k_len / 4) + 1][4][4]);
-  static void decrypt(State state, uint8 data[16], uint8 holder[16],
-                      uint8 round_key[(6 + k_len / 4) + 1][4][4]);
+public:
+  AES(uint8 k_len);
+  void encrypt(uint8 data[16], uint8 holder[16],
+                      uint8 (*round_key)[4][4]);
+  void decrypt(uint8 data[16], uint8 holder[16],
+                      uint8 (*round_key)[4][4]);
   ~AES(){};
 };

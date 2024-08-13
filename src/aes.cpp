@@ -239,62 +239,55 @@ void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
   }
 }
 
+AES::AES(uint8 k_len) {
+  if (k_len == 16 || k_len == 24 || k_len == 32) this->rounds = 6 + k_len / 4;
+  else ERROR("AES::AES(): Invalid key length.");
+}
+
 /* Encrypt the current data in the State and outputs data to a holder
-Parameters: State state: the State instance of the current AES instance
-            uint8 data[16]: data to be encrypted
+Parameters: uint8 data[16]: data to be encrypted
             uint8 holder[16]: holder variable for the encrypted data
-            uint8 round_key[(6 + k_len / 4) + 1][4][4]: array of round keys */
-template <uint8 k_len>
-void AES<k_len>::encrypt(State state, uint8 data[16], uint8 holder[16],
-                         uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
-  CHECK_NULL_PTR(&state);
+            uint8 round_key[7 + k_len / 4][4][4]: array of round keys */
+void AES::encrypt(uint8 data[16], uint8 holder[16],
+                         uint8 (*round_key)[4][4]) {
   CHECK_NON_ZERO_BUFFER(16, data);
   CHECK_NULL_PTR(holder);
   CHECK_NULL_PTR(round_key);
 
-  const uint8 rounds = 6 + k_len / 4;
-  state.update(data);
-  state.add_round_key(round_key[0]);
-  for (uint8 i = 1; i < rounds; i++) {
-    state.sub_bytes(false);
-    state.shift_rows(false);
-    state.mix_columns(false);
-    state.add_round_key(round_key[i]);
+  this->state.update(data);
+  this->state.add_round_key(round_key[0]);
+  for (uint8 i = 1; i < this->rounds; i++) {
+    this->state.sub_bytes(false);
+    this->state.shift_rows(false);
+    this->state.mix_columns(false);
+    this->state.add_round_key(round_key[i]);
   }
-  state.sub_bytes(false);
-  state.shift_rows(false);
-  state.add_round_key(round_key[rounds]);
-  state.serialize(holder);
+  this->state.sub_bytes(false);
+  this->state.shift_rows(false);
+  this->state.add_round_key(round_key[this->rounds]);
+  this->state.serialize(holder);
 }
 
-/* Decrypt the current data in the State and outputs data to a holder
-Parameters: State state: the State instance of the current AES instance
-            uint8 data[16]: data to be decrypted
+/* Decrypt the current data in the this->state and outputs data to a holder
+Parameters: uint8 data[16]: data to be decrypted
             uint8 holder[16]: holder variable for the decrypted data
-            uint8 round_key[(6 + k_len / 4) + 1][4][4]: array of round keys */
-template <uint8 k_len>
-void AES<k_len>::decrypt(State state, uint8 data[16], uint8 holder[16],
-                         uint8 round_key[(6 + k_len / 4) + 1][4][4]) {
-  CHECK_NULL_PTR(&state);
+            uint8 round_key[7 + k_len / 4][4][4]: array of round keys */
+void AES::decrypt(uint8 data[16], uint8 holder[16],
+                         uint8 round_key[AES128_NR+1][4][4]) {
   CHECK_NON_ZERO_BUFFER(16, data);
   CHECK_NULL_PTR(holder);
   CHECK_NULL_PTR(round_key);
 
-  const uint8 rounds = 6 + k_len / 4;
-  state.update(data);
-  state.add_round_key(round_key[rounds]);
-  state.shift_rows(true);
-  state.sub_bytes(true);
-  for (uint8 i = rounds - 1; i > 0; i--) {
-    state.add_round_key(round_key[i]);
-    state.mix_columns(true);
-    state.shift_rows(true);
-    state.sub_bytes(true);
+  this->state.update(data);
+  this->state.add_round_key(round_key[this->rounds]);
+  this->state.shift_rows(true);
+  this->state.sub_bytes(true);
+  for (uint8 i = this->rounds - 1; i > 0; i--) {
+    this->state.add_round_key(round_key[i]);
+    this->state.mix_columns(true);
+    this->state.shift_rows(true);
+    this->state.sub_bytes(true);
   }
-  state.add_round_key(round_key[0]);
-  state.serialize(holder);
+  this->state.add_round_key(round_key[0]);
+  this->state.serialize(holder);
 }
-
-template class AES<16>;
-template class AES<24>;
-template class AES<32>;

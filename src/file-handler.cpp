@@ -1,99 +1,96 @@
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <cstring>
-#include <thread>
-#include <sstream>
+#include "file-handler.h"
 #include <cstdio>
-#include "aes.h"
-#ifndef AES_H
-#define AES_H
 
+bool is_program_file(fs::path path) {
+  return (path.string() == "file-encryptor" || path.string() == "./file-encryptor" ||
+      path.string() == "file-encryptor.exe" || path.string() == "./file-encryptor.exe");
+}
 
-using namespace std;
-
-// Function to read a file into a buffer
-void readFile(ifstream& infile, vector<char>& buffer) {
-    infile.seekg(0, ios::end);
-    streamsize fileSize = infile.tellg();
-    infile.seekg(0, ios::beg);
-
-    while (fileSize > 0) {
-        streamsize readSize = min(static_cast<streamsize>(1024), fileSize);
-        buffer.resize(static_cast<size_t>(readSize));
-        infile.read(buffer.data(), readSize);
-        fileSize -= infile.gcount();
-    }
-    infile.close();
+void scan_directory(fs::path dir_path, vector<fs::path> &files, bool recurse) {
+  if (recurse) {
+    for (const auto &entry : fs::recursive_directory_iterator(dir_path))
+      if (entry.is_regular_file() && !is_program_file(entry.path())) files.push_back(entry.path());
+  } else {
+    for (const auto &entry : fs::directory_iterator(dir_path))
+      if (entry.is_regular_file() && !is_program_file(entry.path())) files.push_back(entry.path());
+  }
 }
 
 // Process a single file: either encrypt or decrypt based on op_type
-void process_file(const string &file_path, char op_type, const uint8 *key, uint8 key_len) {
-    // Open the input file in binary mode
-    ifstream infile(file_path, ios::binary);
-    if (!infile) {
-        cerr << "Unable to open file: " << file_path << endl;
-        return;
+void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *key) {
+  cout << "Processing: " << file_path.c_str() << " ... ";
+
+  // Open the input file in binary mode
+  ifstream in_file(file_path, ios::binary);
+  if (!in_file)
+    ERROR("Unable to open file: %s", file_path.c_str());
+
+  // Determine file size
+  in_file.seekg(0, ios::end);
+  streamsize file_size = in_file.tellg();
+  in_file.seekg(0, ios::beg);
+
+  AES aes_inst(k_len);
+  uint8 round_key[7 + k_len / 4][4][4];
+  key_expansion(k_len, key, round_key);
+
+  fs::path tmp_file_path{file_path.string() + ".enc-tmp"};
+  ofstream tmp_file(tmp_file_path, ios::binary);
+  if (!tmp_file) ERROR("Unable to create output file: %s", tmp_file_path.c_str());
+
+  while (file_size > 0) {
+    char* buffer[64];
+    for (uint8 i = 0; i < 64; i++) {
+      buffer[i] = (char*)malloc(16);
+      for (uint8 j = 0; j < 16; j++) buffer[i][j] = 0;
     }
 
-    vector<uint8> buffer;
-    readFile(infile, buffer);
-
-    AES<16> aes(reinterpret_cast<uint8*>(buffer.data()));
-    vector<uint8> output_buffer(buffer.size());
-    uint8 round_key[6 + key_len / 4][4][4];
-    void key_expansion(uint8 key_len, const uint8 *key, uint8 (*holder)[4][4]);
-    key_expansion(key_len, key, round_key);
-
-
-    if (op_type == 'e') {
-        aes.encrypt(buffer.data(), output_buffer.data(), round_key);
-        
-        string output_file_path = file_path + ".enc";
-        ofstream outfile(output_file_path, ios::binary);
-        if (!outfile) {
-            cerr << "Unable to create output file: " << output_file_path << endl;
-            return;
-        }
-        outfile.write(reinterpret_cast<char*>(output_buffer.data()), output_buffer.size());
-        outfile.close();
-    } else if (op_type == 'd') {
-        aes.decrypt(buffer.data(), output_buffer.data(), round_key);
-        string original_file_path = file_path;
-        ofstream outfile(original_file_path, ios::binary);
-        if (!outfile) {
-            cerr << "Unable to create output file: " << original_file_path << endl;
-            return;
-        }
-        outfile.write(reinterpret_cast<char*>(output_buffer.data()), output_buffer.size());
-        outfile.close();
-        remove(file_path.c_str()); // Delete the .enc file after decryption
-    } else {
-        cerr << "Invalid operation type." << endl;
-        return;
+    // Read data from file and store in buffer variable
+    for (uint8 i = 0; i < 64 && file_size > 0; i++) {
+      streamsize read_size = min((streamsize)16, file_size);
+      in_file.read(buffer[i], read_size);
+      file_size -= in_file.gcount();
     }
 
+    // Process data in buffer variable
+    uint8 holder[16];
+    for (uint8 i = 0; i < 64; i++) {
+      if (!CHECK_NON_ZERO_BUFFER(16, (uint8*)buffer[i])) break;
+      if (op_type == 'e') aes_inst.encrypt((uint8*)buffer[i], holder, round_key);
+      else aes_inst.decrypt((uint8*)buffer[i], holder, round_key);
+
+      // Ignore NULL byte and write to file
+      uint8 w_len = 0;
+      for (; w_len < 16; w_len++) if (!holder[w_len]) break;
+      tmp_file.write((char*)holder, w_len);
+    }
+  }
+
+  in_file.close();
+  tmp_file.close();
+  remove(file_path);  // Remove original file
+  rename(tmp_file_path, file_path); // Rename the temp file to the original file
+  cout << "DONE" << endl;
 }
-
+/*
 // Process multiple files in parallel using threads
 void process_files(const vector<string>& files, const uint8 *key, uint8 key_len, char op_type) {
-    vector<thread> threads; // Vector to hold the threads
-    size_t num_files = files.size();  // Get the number of files to process
+  vector<thread> threads; // Vector to hold the threads
+  size_t num_files = files.size();  // Get the number of files to process
 
-    // Process files in batches of 4
-    for (size_t i = 0; i < num_files; i += 4) {
-        // Launch up to 4 threads for processing files
-        for (size_t j = 0; j < 4 && (i + j) < num_files; ++j) {
-            threads.push_back(std::thread(process_file, files[i + j], key, key_len, op_type)); // Create and start a new thread
-        }
-
-        // Wait for all threads in the current batch to finish
-        for (std::thread &t : threads) {
-            if (t.joinable()) {
-                t.join(); // Wait for the thread to finish
-            }
-        }
-        threads.clear(); // Clear the thread vector for the next batch
+  // Process files in batches of 4
+  for (size_t i = 0; i < num_files; i += 4) {
+    // Launch up to 4 threads for processing files
+    for (size_t j = 0; j < 4 && (i + j) < num_files; ++j) {
+      threads.push_back(thread(process_file, files[i + j], key, key_len, op_type)); // Create and start a new thread
     }
+    // Wait for all threads in the current batch to finish
+    for (thread &t : threads) {
+      if (t.joinable()) {
+        t.join(); // Wait for the thread to finish
+      }
+    }
+    threads.clear(); // Clear the thread vector for the next batch
+  }
 }
-#endif // AES_H
+*/

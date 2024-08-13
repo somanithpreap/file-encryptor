@@ -1,14 +1,5 @@
-#include "aes.h"
+#include "file-handler.h"
 #include <cstring>
-#include <vector>
-#include <filesystem>
-
-namespace fs = filesystem;
-error_code ec; 
-using namespace std;
-
-void scan_directory(const fs::path &dir_path, vector<string> &files, bool recurse);
-void process_file(const string &file_path, char op_type, const uint8 *key, uint8 k_len);
 
 void print_help();
 
@@ -29,15 +20,16 @@ int main(int argc, char *argv[]) {
   char op_type = ' ';
   uint8 k_len = 0;
   uint8 *key;
-  vector<char *> files;
+  vector<string> files;
 
   for (uint8 i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "-e") || !strcmp(argv[i], "--encrypt")) {
-      op_type = 'e';
+    if (!strcmp(argv[i], "-e") || !strcmp(argv[i], "--encrypt") || !strcmp(argv[i], "-d") || !strcmp(argv[i], "--decrypt")) {
+      if (!strcmp(argv[i], "-e") || !strcmp(argv[i], "--encrypt")) op_type = 'e';
+      else op_type = 'd';
       for (uint8 j = i + 1; j < argc; j++) {
         if (!strcmp(argv[j], "-e") || !strcmp(argv[j], "--encrypt") ||
             !strcmp(argv[j], "-d") || !strcmp(argv[j], "--decrypt"))
-          ERROR("Invalid token: %s\n", argv[j]);
+          ERROR("Invalid token: %s", argv[j]);
         if (!strcmp(argv[j], "-k") || !strcmp(argv[j], "--key"))
           break;
 
@@ -52,8 +44,6 @@ int main(int argc, char *argv[]) {
             break;
         }
       }
-    } else if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "--decrypt")) {
-      op_type = 'd';
     } else if (!strcmp(argv[i], "-k") ||
                !strcmp(argv[i],
                        "--key")) { // Check validity of key and parse key
@@ -80,6 +70,10 @@ int main(int argc, char *argv[]) {
     print_help();
     ERROR("No key provided.");
   }
+  if (op_type == ' ') {
+    print_help();
+    ERROR("No operation specified.");
+  }
   if (!files.size()) {
     print_help();
     ERROR("No files specified.");
@@ -88,29 +82,25 @@ int main(int argc, char *argv[]) {
   printf("Key[%hhu]: %s\n", k_len, key);
   printf("Operation: %s\n", (op_type == 'e') ? "Encrypt" : "Decrypt");
   printf("Recurse: %s\n", (recurse) ? "true" : "false");
+
+
+  // File handling and processing
+  vector<fs::path> all_files; // Vector to store all files to be processed
+  for (string file : files) {
+    fs::path path{file};
+    if (fs::is_regular_file(path) && !is_program_file(path)) all_files.push_back(path);
+    else scan_directory(path, all_files, recurse);
+  }
+
+  // Print the input file
   printf("Files:   ");
-  for (uint8 i = 0; i < files.size(); i++)
-    printf("%s ", files.at(i));
-  printf("\n");
+  for (uint8 i = 0; i < all_files.size(); i++)
+    cout << all_files.at(i).c_str() << ' ';
+  cout << endl;
 
-  // File Handling here...
-  vector<string> all_files; // Vector to store all files to be processed
-  for (const auto &file : files) {
-    fs::path path(file);
-    if (fs::is_regular_file(path)) {
-       // If it's a file, add directly to the list of files to process
-      all_files.push_back(path.string());
-      } else if (fs::is_directory(path)) {
-        // If it's a directory, scan the directory and add files to the list
-        scan_directory(path, all_files, recurse);
-      } 
-    }
+  for (fs::path &file : all_files) process_file(file, op_type, k_len, key);
 
-    for (const auto &file : all_files) {
-        process_file(file,op_type, key, k_len);
-    }
-
-    return 0;
+  return 0;
 }
 
 void print_help() {

@@ -62,9 +62,20 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
 +--- README.md
 ```
 2. **File Handler** <br>
-  (To Be Updated)
+  ```cpp
+  bool is_program_file(fs::path path);
+  ```
+  This is a utility function used in the file handling process to avoid processing the program itself.
+  ```cpp
+  void scan_directory(fs::path dir_path, vector<fs::path> &files, bool recurse);
+  ```
+  Used for scanning a directory and adding it to a path vector.
+  ```cpp
+  void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *key);
+  ```
+  Perform the specified operation (encryption/decryption) on the file specified using the AES. This process will create a temporary file to store the processed data, and replace the original file.
 3. **The State** <br>
-```cpp
+  ```cpp
   class State {
   private:
     uint8 state[4][4];
@@ -85,29 +96,30 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
     void mix_columns(bool inverse);
     ~State(){};
   };
-```
+  ```
   This class is responsible for taking the bytes imported by file-handler and arranging them into a 4 * 4 array of bytes called "State." Creating "state" is evolved by various methods, as shown in the code snippet. For more information, check **aes.cpp** to see the usage of each function.
 
 4. **Key Expansion Algorithm** <br>
-```cpp
-  void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
-```
+  ```cpp
+    void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
+  ```
   This function takes the format length of the key, which could be either 16, 24, or 32 bytes, the actual key for encryption or decryption, and a holder array to store the round keys. It's resulting in more unique keys (the number of keys is based on the length of the key, which could be either 11 round keys, 13 round keys, or 15 round keys). The holder variable should have a size of **(6 + k_len / 4) + 1**. For more information, check the comments in **aes.cpp**.
 
 5. **AES Algorithm** <br>
-```cpp
-  template <uint8 k_len> class AES {
-  public:
-    AES(){};
+  ```cpp
+  class AES {
+  private:
+    uint8 rounds;
     State state;
-
-    static void encrypt(State state, uint8 data[16], uint8 holder[16],
-                        uint8 round_key[(6 + k_len / 4) + 1][4][4]);
-    static void decrypt(State state, uint8 data[16], uint8 holder[16],
-                        uint8 round_key[(6 + k_len / 4) + 1][4][4]);
+  public:
+    AES(uint8 k_len);
+    void encrypt(uint8 data[16], uint8 holder[16],
+                        uint8 (*round_key)[4][4]);
+    void decrypt(uint8 data[16], uint8 holder[16],
+                        uint8 (*round_key)[4][4]);
     ~AES(){};
   };
-```
+  ```
   This class is responsible for the implementation of the AES algorithm, both for encryption and decryption. It uses the data from the state and round keys from **round_key** and applies methods to the data and key. After all the processing, it is stored in "holder," which is a holder variable for the encrypted (when the "encrypt" function is used) or the decrypted (when the "decrypt" function is used) data. For more information, check **aes.cpp**.
 
 6. **src/main.cpp** <br>
@@ -118,7 +130,7 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
   - **SBOX** and **InvSBOX** (Substitution Box and Inverse Substitution Box) are used in the **sub_byte()** function. <br>
   - **MIXCOL_MATRIX** and **InvMIXCOL_MATRIX** are used in the **mix_columns()** function. <br>
   - **Rcon** (Round Constant) is used in the **key_expansion()** function. <br>
-   
+
 9. **src/utils.cpp** <br>
   The functions here are utilities for developers to manipulate bytes, check for errors, etc. <br>
   - **ERROR()** function is for displaying an error message and ending the program if it is not running as expected. <br>

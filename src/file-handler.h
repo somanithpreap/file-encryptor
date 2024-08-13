@@ -1,20 +1,13 @@
-#ifndef FILEHANDLING_H
-#define FILEHANDLING_H
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <thread>
+#include "aes.h"
+using namespace std;
+namespace fs = filesystem;
 
-#include <fstream>  // For file input/output operations
-#include <vector>   // For using std::vector to manage dynamic arrays
-#include <string>   // For handling file paths and string manipulation
-#include <thread>   // For multithreading support
-
-#include "aes.h"    // Include the AES encryption/decryption functionality
-#include "utils.h"  // Include utility functions, such as error handling or key expansion
-
-
-
-// Function prototypes
-void readFile(std::ifstream& infile, std::vector<char>& buffer);
-void process_file(const std::string &file_path, const uint8 *key, uint8 key_len, char op_type);
-
-
-
-#endif  // End of header guard
+bool is_program_file(fs::path path);
+void scan_directory(fs::path dir_path, vector<fs::path> &files, bool recurse);
+void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *key);

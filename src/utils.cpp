@@ -21,10 +21,10 @@ bool CHECK_NON_ZERO_BUFFER(size_t length, uint8 *buf) {
     ERROR("CHECK_NON_ZERO_BUFFER(): Buffer length cannot be zero.");
   CHECK_NULL_PTR(buf);
 
-  bool non_zero = true;
+  bool non_zero = false;
   for (size_t i = 0; i < length; i++) {
-    if (buf++) {
-      non_zero = false;
+    if (buf[i]) {
+      non_zero = true;
       break;
     }
   }

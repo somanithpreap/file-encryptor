@@ -38,11 +38,11 @@ int main() {
       {0x82, 0xc7, 0xd0, 0xd9, 0x76, 0x73, 0xa6, 0x9c, 0xcc, 0x74, 0x82, 0xc2,
        0x7f, 0x3b, 0x67, 0x2b},
       {0x9a, 0xe4, 0xf3, 0x75, 0x40, 0xc5, 0x68, 0x9d, 0xc4, 0x6c, 0xee, 0x4e,
-       0xe8, 0xc0, 0xd3, 0xa6},
+       0xe8, 0xc0},
   };
 
   // Initialize AES instances and create round keys
-  AES<16> instance;
+  AES instance(16);
   uint8 round_keys[AES128_NR + 1][4][4];
   key_expansion(16, key, round_keys);
 
@@ -53,7 +53,7 @@ int main() {
   uint8 holder[16];
   printf("After Encryption:\n");
   for (uint8 i = 0; i < 16; i++) {
-    instance.encrypt(instance.state, inputs[i], holder, round_keys);
+    instance.encrypt(inputs[i], holder, round_keys);
     display_buffer(holder);
   }
 }
