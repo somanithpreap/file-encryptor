@@ -18,7 +18,7 @@ void scan_directory(fs::path dir_path, vector<fs::path> &files, bool recurse) {
 
 // Process a single file: either encrypt or decrypt based on op_type
 void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *key) {
-  cout << "Processing: " << file_path.c_str() << " ... ";
+  cout << "Processing: " << file_path.c_str();
 
   // Open the input file in binary mode
   ifstream in_file(file_path, ios::binary);
@@ -29,6 +29,7 @@ void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *k
   in_file.seekg(0, ios::end);
   streamsize file_size = in_file.tellg();
   in_file.seekg(0, ios::beg);
+  cout << '[' << file_size << "B] ..." << endl;
 
   AES aes_inst(k_len);
   uint8 round_key[7 + k_len / 4][4][4];
@@ -39,6 +40,7 @@ void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *k
   if (!tmp_file) ERROR("Unable to create output file: %s", tmp_file_path.c_str());
 
   while (file_size > 0) {
+    uint8 used_blocks = 0;
     char* buffer[64];
     for (uint8 i = 0; i < 64; i++) {
       buffer[i] = (char*)malloc(16);
@@ -46,22 +48,24 @@ void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *k
     }
 
     // Read data from file and store in buffer variable
-    for (uint8 i = 0; i < 64 && file_size > 0; i++) {
+    for (; used_blocks < 64 && file_size > 0; used_blocks++) {
       streamsize read_size = min((streamsize)16, file_size);
-      in_file.read(buffer[i], read_size);
+      in_file.read(buffer[used_blocks], read_size);
       file_size -= in_file.gcount();
     }
 
     // Process data in buffer variable
     uint8 holder[16];
-    for (uint8 i = 0; i < 64; i++) {
-      if (!CHECK_NON_ZERO_BUFFER(16, (uint8*)buffer[i])) break;
+    for (uint8 i = 0; i < used_blocks; i++) {
       if (op_type == 'e') aes_inst.encrypt((uint8*)buffer[i], holder, round_key);
       else aes_inst.decrypt((uint8*)buffer[i], holder, round_key);
+      display_buffer(holder);
 
-      // Ignore NULL byte and write to file
+      // Check for EOF
       uint8 w_len = 0;
-      for (; w_len < 16; w_len++) if (!holder[w_len]) break;
+      for (; w_len < 16; w_len++)
+        if (file_size == 0 && !holder[w_len] && w_len > 0 && w_len < 15)
+          if(holder[w_len - 1] == 0x0A && !holder[w_len + 1]) break;
       tmp_file.write((char*)holder, w_len);
     }
   }
