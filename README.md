@@ -135,7 +135,6 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
   The functions here are utilities for developers to manipulate bytes, check for errors, etc. <br>
   - **ERROR()** function is for displaying an error message and ending the program if it is not running as expected. <br>
   - **CHECK_NULL_PTR()** function is for checking if a pointer given is a NULL pointer. If it does, it displays an error message. <br>
-  - **CHECK_NON_ZERO_BUFFER()** function is for checking if a given buffer has data or not. If it does not, it displays an error message. <br>
   - **display_buffer()** function is for displaying a 16-byte buffer. <br>
   - **l_rotate_word()** function is for shifting bytes to the left based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte. <br>
   - **r_rotate_word()** function is for shifting bytes to the right based on the input. It takes a 4-byte array and a number to determine how far you want to shift a byte. <br>
