@@ -102,14 +102,14 @@ public:
   void set_byte(uint8 row_i, uint8 col_i, uint8 value);
   void serialize(uint8 holder[16]);
 
-  void add_round_key(uint8 r_key[4][4]);
+  void add_round_key(uint8 (*round_keys)[4], uint8 round);
   void sub_bytes(bool inverse);
   void shift_rows(bool inverse);
   void mix_columns(bool inverse);
   ~State(){};
 };
 
-void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
+void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4]);
 
 class AES {
 private:
@@ -118,8 +118,8 @@ private:
 public:
   AES(uint8 k_len);
   void encrypt(uint8 data[16], uint8 holder[16],
-                      uint8 (*round_key)[4][4]);
+                      uint8 (*round_key)[4]);
   void decrypt(uint8 data[16], uint8 holder[16],
-                      uint8 (*round_key)[4][4]);
+                      uint8 (*round_key)[4]);
   ~AES(){};
 };

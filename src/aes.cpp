@@ -132,11 +132,9 @@ void State::serialize(uint8 holder[16]) {
 /* XOR each byte in the State by each respective byte in the given round key
 Parameter: uint8 r_key[4][4]: reference to the round key in a 2D array format
 */
-void State::add_round_key(uint8 r_key[4][4]) {
-  CHECK_NULL_PTR(r_key);
-  for (uint8 r = 0; r < 4; r++) {
-    for (uint8 c = 0; c < 4; c++)
-      this->state[r][c] ^= r_key[c][r];
+void State::add_round_key(uint8 (*round_keys)[4], uint8 round) {
+  for (uint8 c = 0; c < 4; c++) {
+    for (uint8 r = 0; r < 4; r++) this->state[c][r] ^= round_keys[4*round+c][r];
   }
 }
 
@@ -193,51 +191,139 @@ Parameters: uint8 k_len: length of the key (16, 24, or 32) in bytes
             uint8 *key: original key to be expanded
             uint8 (*holder)[4][4]: holder variable for storing round keys (there will be (6 + k_len / 4) + 1 round keys)
 */
-void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
-  CHECK_NON_ZERO_BUFFER(k_len, key);
+// void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]) {
+//   CHECK_NON_ZERO_BUFFER(k_len, key);
+//   CHECK_NULL_PTR(holder);
+
+//   uint8 Nk = k_len / 4;
+//   uint8 Nr = 6 + Nk;
+
+//   uint8 rk = 0;
+//   uint8 w = 0;
+//   while (w < Nk) {
+//     for (uint8 j = 0; j < 4; j++)
+//       holder[rk][w % 4][j] = key[4 * w + j];
+//     w++;
+//     if (!(w % 4))
+//       rk++;
+//   }
+
+//   // This loop is for 1D array 'temp' taking the value of 2D array 'round_key'
+//   // at (i - 1) row which is simply word.
+//   uint8 temp[4];
+//   while (w <= 4 * Nr + 3) {
+//     for (uint8 j = 0; j < 4; j++)
+//       temp[j] = holder[rk][(w % 4) - 1][j];
+
+//     /* This condition left rotates the byte of word, substitute it with SBOX
+//     and do XOR operation on word located at (i % Nk == 0) with Rcon. */
+
+//     if (w % Nk == 0) {
+//       l_rotate_word(temp, 1);
+//       sub_word(false, temp);
+//       for (uint8 j = 0; j < 4; j++) {
+//         temp[j] ^= Rcon[(w - 1) / Nk][j];
+//       }
+//     } else if (Nk > 6 && w % Nk == 4)
+//       sub_word(false, temp);
+
+//     /* This loop does XOR operation between each elements of round_key at (i -
+//     Nk) and temp. It then append 'temp' into 'round_key' at (i)th row. */
+//     for (uint8 j = 0; j < 4; j++)
+//       holder[rk][w % 4][j] = holder[rk][(w % 4) - Nk][j] ^ temp[j];
+//     w++;
+//     if (!(w % 4))
+//       rk++;
+//   }
+// }
+void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4]) {
+  CHECK_NULL_PTR(key);
   CHECK_NULL_PTR(holder);
 
   uint8 Nk = k_len / 4;
   uint8 Nr = 6 + Nk;
 
-  uint8 rk = 0;
-  uint8 w = 0;
-  while (w < Nk) {
-    for (uint8 j = 0; j < 4; j++)
-      holder[rk][w % 4][j] = key[4 * w + j];
-    w++;
-    if (!(w % 4))
-      rk++;
+  uint8 i {0};
+  printf("Output of the first 8 round keys\n");
+  while (i < Nk) {
+    printf("round_key %i: ", i);
+    for (uint8 j = 0; j < 4; j++) {
+      holder[i][j] = key[4 * i + j];
+      printf("%.2x", holder[i][j]);
+    }
+    printf("\n");
+    i++;
   }
+  //i = 8 at the end of 1st while loop
 
-  // This loop is for 1D array 'temp' taking the value of 2D array 'round_key'
-  // at (i - 1) row which is simply word.
+  //This loops is for 1D array 'temp' taking the value of 2D array 'round_key' at (i - 1) row which is simply word.
+
+  printf("Output of the next 52 round keys\n");
   uint8 temp[4];
-  while (w <= 4 * Nr + 3) {
-    for (uint8 j = 0; j < 4; j++)
-      temp[j] = holder[rk][(w % 4) - 1][j];
 
-    /* This condition left rotates the byte of word, substitute it with SBOX
-    and do XOR operation on word located at (i % Nk == 0) with Rcon. */
+  while (i <= 4 * Nr + 3) {
+    //printf("\n");
+    //printf("temp %d : ", i - 1);
+    for (uint8 j = 0; j < 4; j++) {
+      temp[j] = holder[i - 1][j];
+      //printf("%.2x", temp[j]);
+    }
+    //printf("\n");
 
-    if (w % Nk == 0) {
+
+    if (i % Nk == 0) {
+      /*This condition left rotates the byte of word, substitute it with SBOX 
+      and do XOR operation on word located at (i % Nk == 0) with Rcon.*/
       l_rotate_word(temp, 1);
+      //printf("after l_rotate temp %d : ", i - 1);
+      //for (uint8 j = 0; j < 4; j++) {
+      //  printf("%.2x", temp[j]);
+      //}
+      //printf("\n");
+
       sub_word(false, temp);
-      for (uint8 j = 0; j < 4; j++) {
-        temp[j] ^= Rcon[(w - 1) / Nk][j];
+      //printf("after substitute temp %d : ", i - 1);
+      //for (uint8 j = 0; j < 4; j++) {
+      //  printf("%.2x", temp[j]);
+      //}
+      //printf("\n");
+
+      for (uint32 j = 0; j < 4; j++) {
+        temp[j] ^= Rcon[(i - 1) / Nk][j];
       }
-    } else if (Nk > 6 && w % Nk == 4)
+      
+      //printf("after Rcon temp %d : ", i - 1);
+      //for (uint8 j = 0; j < 4; j++) {
+      //  printf("%.2x", temp[j]);
+      //}
+      //printf("\n");
+
+    } else if (Nk > 6 && i % Nk == 4) {
+      /*This condition is only for AES-256.
+      At (i % Nk == 4), 'temp' will be substituted by Sbox*/
       sub_word(false, temp);
 
-    /* This loop does XOR operation between each elements of round_key at (i -
-    Nk) and temp. It then append 'temp' into 'round_key' at (i)th row. */
-    for (uint8 j = 0; j < 4; j++)
-      holder[rk][w % 4][j] = holder[rk][(w % 4) - Nk][j] ^ temp[j];
-    w++;
-    if (!(w % 4))
-      rk++;
+      //printf("l_rotated temp %d : ", i - 1);
+      //for (uint8 j = 0; j < 4; j++) {
+      //  printf("%.2x", temp[j]);
+      //}
+      //printf("\n");
+    }
+    
+    /*This loop does XOR operation between each elements of round_key at (i - Nk) and temp.
+    It then takes append 'temp' into 'round_key' at (i)th row.*/
+    printf("round_key %d : ", i);
+    for (uint32 j = 0; j < 4; j++) {
+      holder[i][j] = holder[i - Nk][j] ^ temp[j];
+      printf("%.2x", holder[i][j]);
+    }
+    printf("\n");
+
+    i++;
   }
 }
+
+
 
 AES::AES(uint8 k_len) {
   if (k_len == 16 || k_len == 24 || k_len == 32) this->rounds = 6 + k_len / 4;
@@ -249,22 +335,22 @@ Parameters: uint8 data[16]: data to be encrypted
             uint8 holder[16]: holder variable for the encrypted data
             uint8 round_key[7 + k_len / 4][4][4]: array of round keys */
 void AES::encrypt(uint8 data[16], uint8 holder[16],
-                         uint8 (*round_key)[4][4]) {
+                         uint8 (*round_key)[4]) {
   CHECK_NON_ZERO_BUFFER(16, data);
   CHECK_NULL_PTR(holder);
   CHECK_NULL_PTR(round_key);
 
   this->state.update(data);
-  this->state.add_round_key(round_key[0]);
+  this->state.add_round_key(round_key, rounds);
   for (uint8 i = 1; i < this->rounds; i++) {
     this->state.sub_bytes(false);
     this->state.shift_rows(false);
     this->state.mix_columns(false);
-    this->state.add_round_key(round_key[i]);
+    this->state.add_round_key(round_key, rounds);
   }
   this->state.sub_bytes(false);
   this->state.shift_rows(false);
-  this->state.add_round_key(round_key[this->rounds]);
+  this->state.add_round_key(round_key, rounds);
   this->state.serialize(holder);
 }
 
@@ -273,21 +359,21 @@ Parameters: uint8 data[16]: data to be decrypted
             uint8 holder[16]: holder variable for the decrypted data
             uint8 round_key[7 + k_len / 4][4][4]: array of round keys */
 void AES::decrypt(uint8 data[16], uint8 holder[16],
-                         uint8 round_key[AES128_NR+1][4][4]) {
+                         uint8 (*round_key)[4]) {
   CHECK_NON_ZERO_BUFFER(16, data);
   CHECK_NULL_PTR(holder);
   CHECK_NULL_PTR(round_key);
 
   this->state.update(data);
-  this->state.add_round_key(round_key[this->rounds]);
+  this->state.add_round_key(round_key, rounds);
   this->state.shift_rows(true);
   this->state.sub_bytes(true);
   for (uint8 i = this->rounds - 1; i > 0; i--) {
-    this->state.add_round_key(round_key[i]);
+    this->state.add_round_key(round_key, rounds);
     this->state.mix_columns(true);
     this->state.shift_rows(true);
     this->state.sub_bytes(true);
   }
-  this->state.add_round_key(round_key[0]);
+  this->state.add_round_key(round_key, rounds);
   this->state.serialize(holder);
 }
