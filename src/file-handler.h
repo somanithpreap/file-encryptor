@@ -4,7 +4,11 @@
 #include <string>
 #include <filesystem>
 #include <thread>
+#include <cstdio>
 #include "aes.h"
+
+#define ff fflush(stdout);
+
 using namespace std;
 namespace fs = filesystem;
 

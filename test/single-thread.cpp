@@ -6,7 +6,7 @@ int main() {
 
   // Initialize AES instances and create round keys
   AES instance(16);
-  uint8 round_keys[(AES128_NR + 1) * 4][4];
+  uint8 round_keys[44][4];
   key_expansion(16, key, round_keys);
 
   printf("Original Buffer: ");

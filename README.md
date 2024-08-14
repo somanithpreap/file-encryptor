@@ -89,8 +89,9 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
     void get_state(uint8 holder[4][4]);
     void set_byte(uint8 row_i, uint8 col_i, uint8 value);
     void serialize(uint8 holder[16]);
+    void print();
 
-    void add_round_key(uint8 r_key[4][4]);
+    void add_round_key(uint8 (*round_keys)[4], uint8 round);
     void sub_bytes(bool inverse);
     void shift_rows(bool inverse);
     void mix_columns(bool inverse);
@@ -101,9 +102,9 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
 
 4. **Key Expansion Algorithm** <br>
   ```cpp
-    void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4][4]);
+    void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4]);
   ```
-  This function takes the format length of the key, which could be either 16, 24, or 32 bytes, the actual key for encryption or decryption, and a holder array to store the round keys. It's resulting in more unique keys (the number of keys is based on the length of the key, which could be either 11 round keys, 13 round keys, or 15 round keys). The holder variable should have a size of **(6 + k_len / 4) + 1**. For more information, check the comments in **aes.cpp**.
+  This function takes the format length of the key, which could be either 16, 24, or 32 bytes, the actual key for encryption or decryption, and a holder array to store the round keys. It's resulting in more unique keys (the number of keys is based on the length of the key, which could be either 11 round keys, 13 round keys, or 15 round keys). The holder variable should be ```uint8 round_keys[28 + k_len][4];```. For more information, check the comments in **aes.cpp**.
 
 5. **AES Algorithm** <br>
   ```cpp
@@ -114,9 +115,9 @@ bin/file-encryptor -k <key> -e/-d [-r] <file_1/folder_1> <file_2/folder_2> ... <
   public:
     AES(uint8 k_len);
     void encrypt(uint8 data[16], uint8 holder[16],
-                        uint8 (*round_key)[4][4]);
+                        uint8 (*round_key)[4]);
     void decrypt(uint8 data[16], uint8 holder[16],
-                        uint8 (*round_key)[4][4]);
+                        uint8 (*round_key)[4]);
     ~AES(){};
   };
   ```

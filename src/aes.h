@@ -1,13 +1,5 @@
 #include "utils.h"
 
-#define M 0x11B
-#define AES128_NR 10 // Number of rounds for 128-bits key
-#define AES192_NR 12 // Number of rounds for 192-bits key
-#define AES256_NR 14 // Number of rounds for 256-bits key
-
-uint8 GF_mul(uint8 a, uint8 b); // Recommended to use this instead of __GF_mul__
-uint8 __GF_mul__(uint8 a, uint8 b);
-
 const uint8 SBOX[16][16] = {{0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5,
                              0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76},
                             {0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0,
@@ -85,8 +77,10 @@ const uint8 Rcon[10][4] = {{0x01, 0x00, 0x00, 0x00}, {0x02, 0x00, 0x00, 0x00},
                            {0x40, 0x00, 0x00, 0x00}, {0x80, 0x00, 0x00, 0x00},
                            {0x1b, 0x00, 0x00, 0x00}, {0x36, 0x00, 0x00, 0x00}};
 
+uint8 GF_mul(uint8 a, uint8 b);
 void sub_byte(bool inverse, uint8 *byte);
 void sub_word(bool inverse, uint8 word[4]);
+void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4]);
 
 class State {
 private:
@@ -109,8 +103,6 @@ public:
   void mix_columns(bool inverse);
   ~State(){};
 };
-
-void key_expansion(uint8 k_len, uint8 *key, uint8 (*holder)[4]);
 
 class AES {
 private:
