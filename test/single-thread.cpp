@@ -1,31 +1,24 @@
 #include "../src/aes.h"
 
 int main() {
-  // A single threaded test of encrypting 64 bytes of data using one AES
-  // instance
-  uint8 key[16] = {0x2b, 0x7e, 0x15, 0x16,
-                   0x28, 0xae, 0xd2, 0xa6,
-                   0xab, 0xf7, 0x15, 0x88,
-                   0x09, 0xcf, 0x4f, 0x3c};
-
-  uint8 inputs[4][4] = {{0x32, 0x43, 0xf6, 0xa8},
-                        {0x88, 0x5a, 0x30, 0x8d},
-                        {0x31, 0x31, 0x98, 0xa2},
-                        {0xe0, 0x37, 0x07, 0x34}};
+  uint8 key[16] = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+  uint8 input[16] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52};
 
   // Initialize AES instances and create round keys
   AES instance(16);
   uint8 round_keys[(AES128_NR + 1) * 4][4];
   key_expansion(16, key, round_keys);
 
-  // printf("Original Buffer:\n");
-  // for (uint8 i = 0; i < 16; i++)
-  //   display_buffer(inputs[i]);
+  printf("Original Buffer: ");
+  display_buffer(input);
 
-  // uint8 holder[16];
-  // printf("After Decryption:\n");
-  // for (uint8 i = 0; i < 16; i++) {
-  //   instance.decrypt(inputs[i], holder, round_keys);
-  //   display_buffer(holder);
-  // }
+  uint8 holder_e[16];
+  printf("After Encryption:\n");
+  instance.encrypt(input, holder_e, round_keys);
+  display_buffer(holder_e);
+
+  uint8 holder_d[16];
+  printf("After Decryption:\n");
+  instance.decrypt(holder_e, holder_d, round_keys);
+  display_buffer(holder_d);
 }

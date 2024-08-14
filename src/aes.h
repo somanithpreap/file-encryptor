@@ -101,6 +101,7 @@ public:
   void get_state(uint8 holder[4][4]);
   void set_byte(uint8 row_i, uint8 col_i, uint8 value);
   void serialize(uint8 holder[16]);
+  void print();
 
   void add_round_key(uint8 (*round_keys)[4], uint8 round);
   void sub_bytes(bool inverse);

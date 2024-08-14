@@ -16,21 +16,6 @@ void CHECK_NULL_PTR(void *ptr) {
   ERROR("CHECK_NULL_PTR(): NULL pointer given.");
 }
 
-bool CHECK_NON_ZERO_BUFFER(size_t length, uint8 *buf) {
-  if (length == 0)
-    ERROR("CHECK_NON_ZERO_BUFFER(): Buffer length cannot be zero.");
-  CHECK_NULL_PTR(buf);
-
-  bool non_zero = false;
-  for (size_t i = 0; i < length; i++) {
-    if (buf[i]) {
-      non_zero = true;
-      break;
-    }
-  }
-  return non_zero;
-}
-
 void display_buffer(uint8 buf[16]) {
   for (uint8 i = 0; i < 16; i++)
     printf("%.2X ", buf[i]);
@@ -40,7 +25,7 @@ void display_buffer(uint8 buf[16]) {
 void l_rotate_word(uint8 word[4], uint8 positions) {
   if (positions == 0)
     ERROR("l_rotate_word(): Positions to be shifted needs to be non-zero.");
-  CHECK_NON_ZERO_BUFFER(4, word);
+  CHECK_NULL_PTR(word);
   positions %= 4;
 
   for (uint8 p = 0; p < positions; p++) {
@@ -54,7 +39,7 @@ void l_rotate_word(uint8 word[4], uint8 positions) {
 void r_rotate_word(uint8 word[4], uint8 positions) {
   if (positions == 0)
     ERROR("l_rotate_word(): Positions to be shifted needs to be non-zero.");
-  CHECK_NON_ZERO_BUFFER(4, word);
+  CHECK_NULL_PTR(word);
   positions %= 4;
 
   for (uint8 p = 0; p < positions; p++) {

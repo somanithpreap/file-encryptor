@@ -29,10 +29,10 @@ void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *k
   in_file.seekg(0, ios::end);
   streamsize file_size = in_file.tellg();
   in_file.seekg(0, ios::beg);
-  cout << '[' << file_size << "B] ..." << endl;
+  cout << " [" << file_size << " B] ... ";
 
   AES aes_inst(k_len);
-  uint8 round_key[7 + k_len / 4][4][4];
+  uint8 round_key[(7 + k_len / 4) * 4][4];
   key_expansion(k_len, key, round_key);
 
   fs::path tmp_file_path{file_path.string() + ".enc-tmp"};
@@ -59,7 +59,6 @@ void process_file(const fs::path &file_path, char op_type, uint8 k_len, uint8 *k
     for (uint8 i = 0; i < used_blocks; i++) {
       if (op_type == 'e') aes_inst.encrypt((uint8*)buffer[i], holder, round_key);
       else aes_inst.decrypt((uint8*)buffer[i], holder, round_key);
-      display_buffer(holder);
 
       // Check for EOF
       uint8 w_len = 0;
